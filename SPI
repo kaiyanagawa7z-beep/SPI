@@ -1,0 +1,892 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SPI語句マスター</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SPI語句">
+<meta name="theme-color" content="#0d0f1a">
+<style>
+:root{
+  --bg:#0d0f1a;--surf:#161929;--card:#1e2238;--bord:#2a2f4a;
+  --blue:#4f8ef7;--purple:#7c5df9;--green:#34d399;--red:#f87171;--gold:#fbbf24;
+  --text:#e8eaf0;--text2:#8891b0;--text3:#4a5070;
+  --r:14px;--rs:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;overflow:hidden;}
+body{display:flex;flex-direction:column;max-width:430px;margin:0 auto;position:relative;}
+
+/* screens */
+.screen{display:none;flex-direction:column;height:100dvh;overflow:hidden;}
+.screen.active{display:flex;}
+
+/* ===== TOP NAV ===== */
+.top-nav{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--bord);background:var(--surf);flex-shrink:0;padding-top:env(safe-area-inset-top,0px);}
+.tn{display:flex;flex-direction:column;align-items:center;padding:10px 2px 8px;cursor:pointer;color:var(--text3);font-size:9px;gap:3px;border-bottom:2px solid transparent;transition:all .2s;}
+.tn.active{color:var(--blue);border-bottom-color:var(--blue);}
+.tn .ico{font-size:19px;}
+
+/* ===== HOME ===== */
+#home{overflow-y:auto;}
+.home-scroll{padding:16px 16px calc(env(safe-area-inset-bottom,0px)+16px);}
+.hero{background:linear-gradient(135deg,#1a2040,#0d0f1a);border:1px solid var(--bord);border-radius:var(--r);padding:20px;margin-bottom:16px;}
+.hero h1{font-size:22px;font-weight:800;letter-spacing:-.5px;}
+.hero h1 em{font-style:normal;color:var(--blue);}
+.hero p{font-size:12px;color:var(--text2);margin-top:4px;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.stat{background:var(--surf);border:1px solid var(--bord);border-radius:var(--rs);padding:12px;text-align:center;}
+.stat .n{font-size:20px;font-weight:800;color:var(--blue);}
+.stat .l{font-size:10px;color:var(--text2);margin-top:2px;}
+.sec-head{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;margin-bottom:8px;margin-top:4px;}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.mode-btn{background:var(--surf);border:1px solid var(--bord);border-radius:var(--rs);padding:14px 10px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:4px;transition:border-color .2s,transform .15s;}
+.mode-btn:active{transform:scale(.97);}
+.mode-btn .ico{font-size:22px;}
+.mode-btn h3{font-size:13px;font-weight:700;color:var(--text);}
+.mode-btn p{font-size:10px;color:var(--text2);}
+.stage-list{display:flex;flex-direction:column;gap:8px;}
+.stage-row{background:var(--surf);border:1px solid var(--bord);border-radius:var(--rs);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:transform .15s,border-color .15s;}
+.stage-row:active{transform:scale(.98);}
+.stage-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.stage-info{flex:1;min-width:0;}
+.stage-info h3{font-size:14px;font-weight:700;}
+.stage-info p{font-size:11px;color:var(--text2);margin-top:1px;}
+.pbar{height:3px;background:var(--bord);border-radius:2px;margin-top:6px;overflow:hidden;}
+.pbar-fill{height:100%;border-radius:2px;transition:width .4s;}
+.badge-done{font-size:10px;padding:2px 7px;background:rgba(52,211,153,.15);color:var(--green);border-radius:10px;flex-shrink:0;}
+
+/* ===== MASTER MODE (東進スタイル) ===== */
+#master{overflow:hidden;}
+.master-header{padding:12px 16px;padding-top:calc(env(safe-area-inset-top,0px)+12px);border-bottom:1px solid var(--bord);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.back-btn{width:34px;height:34px;background:var(--surf);border:1px solid var(--bord);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;}
+.m-title{flex:1;font-size:14px;font-weight:700;}
+.m-info{font-size:11px;color:var(--text2);}
+
+.master-body{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+
+/* progress */
+.m-prog{padding:10px 16px;flex-shrink:0;}
+.m-prog-bar{height:5px;background:var(--bord);border-radius:3px;overflow:hidden;}
+.m-prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:3px;transition:width .3s;}
+.m-prog-label{display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-top:4px;}
+
+/* question area */
+.q-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:16px;}
+.q-label{font-size:10px;color:var(--text3);font-weight:700;letter-spacing:1px;}
+
+/* timer ring */
+.timer-ring{position:relative;width:60px;height:60px;}
+.timer-ring svg{transform:rotate(-90deg);}
+.timer-ring .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;}
+
+/* question card */
+.q-card{width:100%;background:var(--card);border:1px solid var(--bord);border-radius:var(--r);padding:24px;text-align:center;}
+.q-no{font-size:10px;color:var(--text3);margin-bottom:8px;}
+.q-term{font-size:28px;font-weight:800;line-height:1.3;margin-bottom:4px;}
+.q-read{font-size:13px;color:var(--text2);}
+.q-meaning-prompt{font-size:13px;color:var(--text3);margin-top:8px;}
+
+/* choices */
+.choices{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.choice{background:var(--surf);border:1.5px solid var(--bord);border-radius:var(--rs);padding:12px 10px;cursor:pointer;font-size:13px;text-align:center;line-height:1.4;transition:all .15s;font-family:inherit;color:var(--text);font-weight:500;}
+.choice:active{transform:scale(.97);}
+.choice.correct{background:rgba(52,211,153,.15);border-color:var(--green);color:var(--green);}
+.choice.wrong{background:rgba(248,113,113,.12);border-color:var(--red);color:var(--red);}
+.choice.reveal{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.4);}
+.choice:disabled{cursor:default;}
+
+/* result flash */
+.result-flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:64px;pointer-events:none;z-index:999;animation:flash .5s forwards;}
+@keyframes flash{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(2)}}
+
+/* streak badges */
+.streak-bar{display:flex;gap:4px;padding:0 16px 10px;flex-shrink:0;overflow-x:auto;}
+.streak-dot{width:14px;height:14px;border-radius:50%;background:var(--bord);flex-shrink:0;transition:background .2s;}
+.streak-dot.hit{background:var(--green);}
+.streak-dot.miss{background:var(--red);}
+
+/* ===== WORDLIST ===== */
+#wordlist{overflow:hidden;}
+.wl-search{padding:10px 14px;border-bottom:1px solid var(--bord);flex-shrink:0;}
+.wl-search input{width:100%;background:var(--surf);border:1px solid var(--bord);border-radius:var(--rs);padding:9px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none;}
+.wl-search input::placeholder{color:var(--text3);}
+.wl-filter{display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--bord);overflow-x:auto;flex-shrink:0;}
+.flt{padding:5px 12px;border-radius:16px;border:1px solid var(--bord);background:var(--surf);color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0;}
+.flt.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.wl-body{flex:1;overflow-y:auto;padding:8px 12px;}
+.word-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--rs);border:1px solid transparent;margin-bottom:4px;cursor:pointer;}
+.word-row.flagged{border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.04);}
+.wdot{width:7px;height:7px;border-radius:50%;background:var(--bord);flex-shrink:0;}
+.wdot.g{background:var(--green);}.wdot.r{background:var(--red);}.wdot.y{background:var(--gold);}
+.winfo{flex:1;min-width:0;}
+.wterm{font-size:14px;font-weight:700;}
+.wread{font-size:10px;color:var(--text3);}
+.wmeaning{font-size:11px;color:var(--text2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wflag{background:none;border:none;font-size:17px;cursor:pointer;opacity:.4;flex-shrink:0;padding:4px;}
+.wflag.on{opacity:1;}
+.w-stage-tag{font-size:9px;padding:2px 6px;border-radius:8px;background:var(--bord);color:var(--text3);flex-shrink:0;}
+
+/* ===== PRACTICE (選択問題) ===== */
+#practice{overflow:hidden;}
+.prac-header{padding:12px 16px;padding-top:calc(env(safe-area-inset-top,0px)+12px);border-bottom:1px solid var(--bord);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.prac-type-tabs{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid var(--bord);overflow-x:auto;flex-shrink:0;}
+.ptab{padding:6px 14px;border-radius:16px;border:1px solid var(--bord);background:var(--surf);color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0;transition:all .2s;}
+.ptab.active{background:var(--purple);border-color:var(--purple);color:#fff;}
+.prac-body{flex:1;overflow-y:auto;padding:12px 14px 80px;}
+.pq-card{background:var(--card);border:1px solid var(--bord);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.pq-num{font-size:10px;color:var(--text3);font-weight:700;margin-bottom:8px;}
+.pq-text{font-size:14px;line-height:1.75;margin-bottom:14px;}
+.pq-ul{text-decoration:underline;text-decoration-color:var(--blue);font-weight:600;}
+.pq-choices{display:flex;flex-direction:column;gap:7px;}
+.pq-choice{padding:11px 13px;border-radius:var(--rs);border:1px solid var(--bord);background:var(--surf);cursor:pointer;font-size:13px;display:flex;align-items:flex-start;gap:9px;transition:all .2s;font-family:inherit;color:var(--text);text-align:left;width:100%;line-height:1.4;}
+.pq-choice:disabled{cursor:default;}
+.pq-choice.selected{border-color:var(--blue);background:rgba(79,142,247,.08);}
+.pq-choice.correct{border-color:var(--green);background:rgba(52,211,153,.1);color:var(--green);}
+.pq-choice.wrong{border-color:var(--red);background:rgba(248,113,113,.1);color:var(--red);}
+.pq-lbl{width:22px;height:22px;border-radius:6px;background:var(--bord);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.pq-exp{margin-top:10px;padding:10px;background:rgba(79,142,247,.07);border-radius:var(--rs);font-size:12px;color:var(--text2);line-height:1.6;display:none;}
+.pq-exp.show{display:block;}
+.prac-fab{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px)+14px);left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border:none;border-radius:20px;padding:13px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(79,142,247,.4);display:none;white-space:nowrap;}
+
+/* ===== COMPLETE ===== */
+#complete{align-items:center;justify-content:center;padding:30px 20px;gap:16px;}
+.comp-emoji{font-size:64px;}
+.comp-title{font-size:26px;font-weight:800;text-align:center;}
+.comp-sub{font-size:14px;color:var(--text2);text-align:center;}
+.comp-rank{font-size:48px;font-weight:900;text-align:center;}
+.comp-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%;}
+.cs{background:var(--surf);border:1px solid var(--bord);border-radius:var(--rs);padding:12px;text-align:center;}
+.cs .n{font-size:24px;font-weight:800;}
+.cs .l{font-size:10px;color:var(--text2);margin-top:2px;}
+.comp-btn{background:var(--blue);color:#fff;border:none;border-radius:var(--rs);padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;}
+.comp-btn.sec{background:var(--surf);border:1px solid var(--bord);color:var(--text);}
+
+/* scrollbar */
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bord);border-radius:2px;}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.anim{animation:slideUp .25s ease;}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:shake .3s ease;}
+</style>
+</head>
+<body>
+
+<!-- ===== TOP NAV ===== -->
+<div class="top-nav">
+  <div class="tn active" onclick="showTab('home')" id="tn-home"><div class="ico">🏠</div>ホーム</div>
+  <div class="tn" onclick="showTab('master')" id="tn-master"><div class="ico">⚡</div>マスター</div>
+  <div class="tn" onclick="showTab('wordlist')" id="tn-wordlist"><div class="ico">📋</div>単語帳</div>
+  <div class="tn" onclick="showTab('practice')" id="tn-practice"><div class="ico">📝</div>問題</div>
+  <div class="tn" onclick="showTab('stats')" id="tn-stats"><div class="ico">📊</div>記録</div>
+</div>
+
+<!-- ===== HOME ===== -->
+<div id="home" class="screen active">
+<div class="home-scroll">
+  <div class="hero">
+    <h1>SPI<em>語句</em>マスター</h1>
+    <p>467語 ✕ 東進スタイルで完全習得を目指そう</p>
+    <div id="save-status" style="font-size:11px;margin-top:4px;min-height:14px;"></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="n" id="h-learned">0</div><div class="l">習得済み</div></div>
+    <div class="stat"><div class="n" id="h-weak" style="color:var(--red)">0</div><div class="l">要復習</div></div>
+    <div class="stat"><div class="n" id="h-pct" style="color:var(--gold)">0%</div><div class="l">達成率</div></div>
+  </div>
+
+  <div class="sec-head">1セットの問題数</div>
+  <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
+    <button class="flt active" id="lim-btn-10" onclick="setLimit(10,this)">10問</button>
+    <button class="flt" id="lim-btn-20" onclick="setLimit(20,this)">20問</button>
+    <button class="flt" id="lim-btn-30" onclick="setLimit(30,this)">30問</button>
+    <button class="flt" id="lim-btn-50" onclick="setLimit(50,this)">50問</button>
+    <button class="flt" id="lim-btn-0" onclick="setLimit(0,this)">全問</button>
+  </div>
+  <div class="sec-head">学習モード</div>
+  <div class="mode-grid" style="margin-bottom:16px;">
+    <div class="mode-btn" onclick="startMaster('all',undefined,currentLimit)" style="border-color:rgba(79,142,247,.4)">
+      <div class="ico">⚡</div>
+      <h3>全語マスター</h3>
+      <p id="mode-all-sub">10問セット</p>
+    </div>
+    <div class="mode-btn" onclick="startMaster('weak',undefined,currentLimit)" style="border-color:rgba(248,113,113,.4)">
+      <div class="ico">🎯</div>
+      <h3>苦手集中</h3>
+      <p id="mode-weak-sub">間違えた語だけ</p>
+    </div>
+    <div class="mode-btn" onclick="startMaster('flagged',undefined,currentLimit)" style="border-color:rgba(251,191,36,.4)">
+      <div class="ico">🏴</div>
+      <h3>要復習のみ</h3>
+      <p>フラグ付きの語</p>
+    </div>
+    <div class="mode-btn" onclick="showTab('practice')">
+      <div class="ico">📝</div>
+      <h3>選択問題</h3>
+      <p>二語の関係・長文</p>
+    </div>
+  </div>
+
+  <div class="sec-head">ステージ別学習</div>
+  <div class="stage-list" id="stage-list"></div>
+</div>
+</div>
+
+<!-- ===== MASTER MODE ===== -->
+<div id="master" class="screen">
+  <div class="master-header">
+    <div class="back-btn" onclick="exitMaster()">←</div>
+    <div class="m-title" id="m-title">マスターモード</div>
+    <div class="m-info" id="m-info">0 / 0</div>
+    <div class="back-btn" onclick="toggleCardMode()" id="m-mode-btn" title="モード切替">💭</div>
+  <div class="back-btn" onclick="toggleFlag()" id="m-flag">🏳️</div>
+  </div>
+  <div class="m-prog">
+    <div class="m-prog-bar"><div class="m-prog-fill" id="m-fill" style="width:0%"></div></div>
+    <div class="m-prog-label"><span id="m-prog-l">0問目</span><span id="m-prog-r">正解0 ミス0</span></div>
+  </div>
+  <div class="streak-bar" id="streak-bar"></div>
+  <div class="master-body">
+    <div class="q-area">
+      <div class="q-label" id="q-label">次の語句の意味として正しいものを選べ</div>
+      <div class="q-card">
+        <div class="q-no" id="q-no">No.001</div>
+        <div class="q-term" id="q-term">拘泥</div>
+        <div class="q-read" id="q-read">こうでい</div>
+        <div class="q-meaning-prompt" id="q-mprompt">この語句の意味は？</div>
+      </div>
+      <div class="choices" id="choices"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== WORDLIST ===== -->
+<div id="wordlist" class="screen">
+  <div class="wl-search">
+    <input type="text" placeholder="🔍 語句・よみ・意味で検索..." id="wl-input" oninput="renderWordlist()">
+  </div>
+  <div class="wl-filter">
+    <button class="flt active" onclick="setWFilter('all',this)">すべて(467)</button>
+    <button class="flt" onclick="setWFilter('flagged',this)">🏴 要復習</button>
+    <button class="flt" onclick="setWFilter('wrong',this)">✗ 未習得</button>
+    <button class="flt" onclick="setWFilter('learned',this)">✓ 習得済み</button>
+    <button class="flt" onclick="setWFilter('s1',this)">ST1</button>
+    <button class="flt" onclick="setWFilter('s2',this)">ST2</button>
+    <button class="flt" onclick="setWFilter('s3',this)">ST3</button>
+    <button class="flt" onclick="setWFilter('s4',this)">ST4</button>
+    <button class="flt" onclick="setWFilter('s5',this)">ST5</button>
+    <button class="flt" onclick="setWFilter('s6',this)">ST6</button>
+    <button class="flt" onclick="setWFilter('s7',this)">ST7</button>
+  </div>
+  <div class="wl-body" id="wl-body"></div>
+</div>
+
+<!-- ===== PRACTICE ===== -->
+<div id="practice" class="screen">
+  <div class="prac-header">
+    <div class="m-title">練習問題</div>
+  </div>
+  <div class="prac-type-tabs">
+    <button class="ptab active" onclick="setPType('vocab',this)">語句の意味</button>
+    <button class="ptab" onclick="setPType('relation',this)">二語の関係</button>
+    <button class="ptab" onclick="setPType('multi',this)">複数の意味</button>
+    <button class="ptab" onclick="setPType('fill',this)">空欄補充</button>
+    <button class="ptab" onclick="setPType('sort',this)">文の並べ替え</button>
+    <button class="ptab" onclick="setPType('compound',this)">熟語の成り立ち</button>
+  </div>
+  <div class="prac-body" id="prac-body"></div>
+  <button class="prac-fab" id="prac-fab" onclick="nextPrac()">次の問題へ →</button>
+</div>
+
+<!-- ===== STATS ===== -->
+<div id="stats" class="screen" style="overflow-y:auto;padding:20px 16px;">
+  <div class="sec-head">学習記録</div>
+  <div id="stats-body" style="display:flex;flex-direction:column;gap:10px;margin-top:8px;"></div>
+</div>
+
+<!-- ===== COMPLETE ===== -->
+<div id="complete" class="screen">
+  <div class="comp-emoji" id="c-emoji">🎉</div>
+  <div class="comp-title" id="c-title">ステージクリア！</div>
+  <div class="comp-rank" id="c-rank">★★★</div>
+  <div class="comp-sub" id="c-sub">よく頑張りました！</div>
+  <div class="comp-stats">
+    <div class="cs"><div class="n" style="color:var(--green)" id="c-cor">0</div><div class="l">正解</div></div>
+    <div class="cs"><div class="n" style="color:var(--red)" id="c-miss">0</div><div class="l">ミス</div></div>
+    <div class="cs"><div class="n" style="color:var(--gold)" id="c-pct">0%</div><div class="l">正解率</div></div>
+  </div>
+  <button class="comp-btn" onclick="retryMiss()">✗ ミスした語だけ再挑戦</button>
+  <button class="comp-btn sec" onclick="exitMaster()">ホームに戻る</button>
+</div>
+
+<script>
+const VOCAB_ALL=[{"id":1,"no":"001","term":"拘泥","read":"こうでい","meaning":"気にしてこだわること。","stage":1},{"id":2,"no":"002","term":"逡巡","read":"しゅんじゅん","meaning":"決断をためらい、ぐずぐずすること。","stage":1},{"id":3,"no":"003","term":"生え抜き","read":"はえぬき","meaning":"初めからその組織に所属し続けていること。","stage":1},{"id":4,"no":"004","term":"粗略","read":"そりゃく","meaning":"扱いがぞんざいで、丁寧でないこと。","stage":1},{"id":5,"no":"005","term":"詮議","read":"せんぎ","meaning":"意見を交わし、物事を詳しく調べて明らかにすること。","stage":1},{"id":6,"no":"006","term":"冗漫","read":"じょうまん","meaning":"文章や話に無駄が多く、しまりがないこと。","stage":1},{"id":7,"no":"007","term":"目こぼし","read":"めこぼし","meaning":"過失や不正などを大目に見て、とがめないこと。","stage":1},{"id":8,"no":"008","term":"逆ねじ","read":"さかねじ","meaning":"批判された相手に、逆に批判を返すこと。","stage":1},{"id":9,"no":"009","term":"垂涎","read":"すいぜん","meaning":"ある物をしきりに欲しがること。","stage":1},{"id":10,"no":"010","term":"不覚","read":"ふかく","meaning":"思わずそうなってしまうこと。油断して失敗すること。","stage":1},{"id":11,"no":"011","term":"胸算用","read":"むなざんよう","meaning":"心の中でおおまかな見積もりを立てること。","stage":1},{"id":12,"no":"012","term":"横着","read":"おうちゃく","meaning":"すべきことをわざと怠けてしないこと。","stage":1},{"id":13,"no":"013","term":"食傷","read":"しょくしょう","meaning":"同じことが繰り返され、飽きて嫌になること。","stage":1},{"id":14,"no":"014","term":"必至","read":"ひっし","meaning":"必ずそうなり、避けられないこと。","stage":1},{"id":15,"no":"015","term":"おおわらわ","read":"","meaning":"なりふり構わず、懸命に物事に当たる様子。","stage":1},{"id":16,"no":"016","term":"資する","read":"しする","meaning":"ある物事を行うのに役立つこと。","stage":1},{"id":17,"no":"017","term":"公算","read":"こうさん","meaning":"物事が起こる見込み。確からしさ。","stage":1},{"id":18,"no":"018","term":"ことほぐ","read":"寿ぐ","meaning":"祝いの言葉を述べること。","stage":1},{"id":19,"no":"019","term":"たゆたう","read":"","meaning":"ゆらゆらと揺れ動くこと。","stage":1},{"id":20,"no":"020","term":"さかしげ","read":"","meaning":"いかにも賢そうな様子。","stage":1},{"id":21,"no":"021","term":"あけすけ","read":"","meaning":"包み隠さず、ありのままな様子。","stage":1},{"id":22,"no":"022","term":"臍をかむ","read":"ほぞをかむ","meaning":"どうにもならないことを残念がり、後悔すること。","stage":1},{"id":23,"no":"023","term":"つまびらか","read":"詳らか","meaning":"細かなところまで、詳しくはっきりしている様子。","stage":1},{"id":24,"no":"024","term":"さもしい","read":"","meaning":"心が卑しく、品性が下劣な様子。","stage":1},{"id":25,"no":"025","term":"あながち","read":"","meaning":"打ち消しを伴い、「必ずしも」「一概に」の意味。","stage":1},{"id":26,"no":"026","term":"かまける","read":"","meaning":"一つのことに気を取られ、ほかをおろそかにすること。","stage":1},{"id":27,"no":"027","term":"おもはゆい","read":"面映ゆい","meaning":"照れくさく、きまり悪く感じること。","stage":1},{"id":28,"no":"028","term":"水を向ける","read":"","meaning":"相手の関心が向くように、それとなく誘いかけること。","stage":1},{"id":29,"no":"029","term":"拠ん所ない","read":"よんどころない","meaning":"そうするより仕方がない。やむを得ない。","stage":1},{"id":30,"no":"030","term":"照準","read":"しょうじゅん","meaning":"ねらいを定めること。","stage":2},{"id":31,"no":"031","term":"蹂躙","read":"じゅうりん","meaning":"踏みにじり、侵害すること。","stage":2},{"id":32,"no":"032","term":"苦笑","read":"くしょう","meaning":"不快さや困惑を感じながら、仕方なく笑うこと。","stage":2},{"id":33,"no":"033","term":"悠長","read":"ゆうちょう","meaning":"急ぐ必要があっても、のんびり構えている様子。","stage":2},{"id":34,"no":"034","term":"強記","read":"きょうき","meaning":"記憶力が優れていること。","stage":2},{"id":35,"no":"035","term":"領袖","read":"りょうしゅう","meaning":"ある集団を率いる人物。","stage":2},{"id":36,"no":"036","term":"刮目","read":"かつもく","meaning":"目をこすり、注意してよく見ること。","stage":2},{"id":37,"no":"037","term":"催事","read":"さいじ","meaning":"特別に行われる催し。","stage":2},{"id":38,"no":"038","term":"気鋭","read":"きえい","meaning":"意気込みが鋭く、勢いがあること。","stage":2},{"id":39,"no":"039","term":"流布","read":"るふ","meaning":"世間に広まり、広く知れ渡ること。","stage":2},{"id":40,"no":"040","term":"驚嘆","read":"きょうたん","meaning":"驚き、ひどく感心すること。","stage":2},{"id":41,"no":"041","term":"心服","read":"しんぷく","meaning":"心から尊敬し、従うこと。","stage":2},{"id":42,"no":"042","term":"敷衍","read":"ふえん","meaning":"言葉を補い、意味を広げて詳しく説明すること。","stage":2},{"id":43,"no":"043","term":"進取","read":"しんしゅ","meaning":"自ら進んで新しいことに取り組むこと。","stage":2},{"id":44,"no":"044","term":"卓見","read":"たっけん","meaning":"優れた意見や見解。","stage":2},{"id":45,"no":"045","term":"参画","read":"さんかく","meaning":"計画を立てる段階から加わること。","stage":2},{"id":46,"no":"046","term":"克明","read":"こくめい","meaning":"細かなところまで注意が行き届き、手落ちがないこと。","stage":2},{"id":47,"no":"047","term":"鎬を削る","read":"しのぎをけずる","meaning":"激しく争うこと。","stage":2},{"id":48,"no":"048","term":"鳩首","read":"きゅうしゅ","meaning":"人々が集まり、額を寄せ合って相談すること。","stage":2},{"id":49,"no":"049","term":"木鐸","read":"ぼくたく","meaning":"世の人々を教え導く人。指導者。","stage":2},{"id":50,"no":"050","term":"陥穽","read":"かんせい","meaning":"人を陥れるわな。落とし穴。","stage":2},{"id":51,"no":"051","term":"義憤","read":"ぎふん","meaning":"不正なことに対する怒り。","stage":2},{"id":52,"no":"052","term":"謳歌","read":"おうか","meaning":"恵まれた境遇を大いに楽しみ、その喜びを表すこと。","stage":2},{"id":53,"no":"053","term":"粉飾","read":"ふんしょく","meaning":"実際より立派に見せるため、うわべを飾ること。","stage":2},{"id":54,"no":"054","term":"因習","read":"いんしゅう","meaning":"古くから受け継がれている習慣。","stage":2},{"id":55,"no":"055","term":"大度","read":"たいど","meaning":"度量が大きく、寛大なこと。","stage":2},{"id":56,"no":"056","term":"言下","read":"げんか","meaning":"言い終わるか終わらないうち。即座。","stage":2},{"id":57,"no":"057","term":"居丈高","read":"いたけだか","meaning":"相手を威圧するような態度。","stage":2},{"id":58,"no":"058","term":"踏襲","read":"とうしゅう","meaning":"それまでの方法や方針を、そのまま引き継ぐこと。","stage":2},{"id":59,"no":"059","term":"梗概","read":"こうがい","meaning":"物語などのあらすじ。","stage":2},{"id":60,"no":"060","term":"瞠目","read":"どうもく","meaning":"驚きや感心のために目を見張ること。","stage":2},{"id":61,"no":"061","term":"保身","read":"ほしん","meaning":"自分の地位や名声などの安全を守ること。","stage":2},{"id":62,"no":"062","term":"跳梁","read":"ちょうりょう","meaning":"悪者などが勝手に動き回り、悪事を働くこと。","stage":2},{"id":63,"no":"063","term":"履行","read":"りこう","meaning":"約束や契約で決められたことを実行すること。","stage":2},{"id":64,"no":"064","term":"安閑","read":"あんかん","meaning":"心配がなく、のんびりと静かにしている様子。","stage":2},{"id":65,"no":"065","term":"私淑","read":"ししゅく","meaning":"直接教わらずに、ひそかにその人を師と仰ぐこと。","stage":2},{"id":66,"no":"066","term":"高尚","read":"こうしょう","meaning":"学問や言行などの程度が高く、上品なこと。","stage":2},{"id":67,"no":"067","term":"鼓舞","read":"こぶ","meaning":"励まして奮い立たせること。","stage":2},{"id":68,"no":"068","term":"即妙","read":"そくみょう","meaning":"その場に応じて、機転が利いていること。","stage":2},{"id":69,"no":"069","term":"崇高","read":"すうこう","meaning":"気高く、尊い様子。","stage":2},{"id":70,"no":"070","term":"出仕","read":"しゅっし","meaning":"官庁などに勤めること。官職に就くこと。","stage":2},{"id":71,"no":"071","term":"射幸","read":"しゃこう","meaning":"偶然の利益や成功を当てにすること。","stage":2},{"id":72,"no":"072","term":"蔓延","read":"まんえん","meaning":"好ましくないことが広くはびこること。","stage":2},{"id":73,"no":"073","term":"落成","read":"らくせい","meaning":"工事が終わり、建物などが完成すること。","stage":2},{"id":74,"no":"074","term":"言外","read":"げんがい","meaning":"直接言葉には表していない部分。","stage":2},{"id":75,"no":"075","term":"膠着","read":"こうちゃく","meaning":"同じ状態に固定され、進展しないこと。","stage":2},{"id":76,"no":"076","term":"言質","read":"げんち","meaning":"後で証拠として使われる言葉。","stage":2},{"id":77,"no":"077","term":"博覧に供する","read":"はくらん","meaning":"広く一般の人が見られるようにすること。","stage":2},{"id":78,"no":"078","term":"画策","read":"かくさく","meaning":"計画を立て、実現のために手を尽くすこと。","stage":2},{"id":79,"no":"079","term":"慇懃","read":"いんぎん","meaning":"礼儀正しく、丁寧なこと。","stage":2},{"id":80,"no":"080","term":"果断","read":"かだん","meaning":"ためらわず、思い切って行う様子。","stage":2},{"id":81,"no":"081","term":"慧眼","read":"けいがん","meaning":"物事の本質を見抜く、鋭い眼力。","stage":2},{"id":82,"no":"082","term":"省察","read":"せいさつ","meaning":"自分自身を振り返り、よく考えること。","stage":2},{"id":83,"no":"083","term":"嘆息","read":"たんそく","meaning":"嘆いて、ため息をつくこと。","stage":2},{"id":84,"no":"084","term":"意匠","read":"いしょう","meaning":"形や飾りなどに凝らした工夫。デザイン。","stage":2},{"id":85,"no":"085","term":"迎合","read":"げいごう","meaning":"相手に調子を合わせ、気に入られようとすること。","stage":2},{"id":86,"no":"086","term":"具備","read":"ぐび","meaning":"必要なものを十分に備えていること。","stage":2},{"id":87,"no":"087","term":"銘記","read":"めいき","meaning":"心に刻み、忘れないようにすること。","stage":2},{"id":88,"no":"088","term":"断腸","read":"だんちょう","meaning":"はらわたがちぎれるほど、非常につらいこと。","stage":3},{"id":89,"no":"089","term":"仮託","read":"かたく","meaning":"ほかの物事にことよせて表すこと。","stage":3},{"id":90,"no":"090","term":"雄飛","read":"ゆうひ","meaning":"勢いよく、盛んに活動すること。","stage":3},{"id":91,"no":"091","term":"晦日","read":"みそか","meaning":"月の最後の日。","stage":3},{"id":92,"no":"092","term":"斟酌","read":"しんしゃく","meaning":"相手の事情や心情などをくみとること。","stage":3},{"id":93,"no":"093","term":"忖度","read":"そんたく","meaning":"相手の心中を推し量ること。","stage":3},{"id":94,"no":"094","term":"不埒","read":"ふらち","meaning":"道理に外れ、けしからぬこと。","stage":3},{"id":95,"no":"095","term":"庶幾","read":"しょき","meaning":"心から願い、強く希望すること。","stage":3},{"id":96,"no":"096","term":"拮抗","read":"きっこう","meaning":"力がほぼ等しく、優劣がつかないこと。","stage":3},{"id":97,"no":"097","term":"先達","read":"せんだつ","meaning":"その分野に先に進み、ほかの人を導く人。","stage":3},{"id":98,"no":"098","term":"督励","read":"とくれい","meaning":"監督し、励ますこと。","stage":3},{"id":99,"no":"099","term":"超然","read":"ちょうぜん","meaning":"世俗のことにこだわらず、ゆったりしている様子。","stage":3},{"id":100,"no":"100","term":"杜撰","read":"ずさん","meaning":"いい加減で、手抜きや誤りが多いこと。","stage":3},{"id":101,"no":"101","term":"円熟","read":"えんじゅく","meaning":"十分に熟達し、豊かな内容を持つこと。","stage":3},{"id":102,"no":"102","term":"老成","read":"ろうせい","meaning":"経験を積み、考えや技量が成熟すること。","stage":3},{"id":103,"no":"103","term":"詭弁","read":"きべん","meaning":"道理に合わない、こじつけの議論。","stage":3},{"id":104,"no":"104","term":"至言","read":"しげん","meaning":"物事の本質を的確に言い表した言葉。","stage":3},{"id":105,"no":"105","term":"適宜","read":"てきぎ","meaning":"その場の状況に合わせて、適切に行う様子。","stage":3},{"id":106,"no":"106","term":"僭越","read":"せんえつ","meaning":"自分の地位や立場を越えて出過ぎること。","stage":3},{"id":107,"no":"107","term":"裁量","read":"さいりょう","meaning":"自分の判断で物事を処理すること。","stage":3},{"id":108,"no":"108","term":"気概","read":"きがい","meaning":"困難に負けない、強い意志や気性。","stage":3},{"id":109,"no":"109","term":"笑殺","read":"しょうさつ","meaning":"笑い飛ばして、問題にしないこと。","stage":3},{"id":110,"no":"110","term":"希有","read":"けう","meaning":"めったにないこと。","stage":3},{"id":111,"no":"111","term":"陶冶","read":"とうや","meaning":"性質や能力を鍛え、育てること。","stage":3},{"id":112,"no":"112","term":"証左","read":"しょうさ","meaning":"証拠。物事を証明するもの。","stage":3},{"id":113,"no":"113","term":"気丈","read":"きじょう","meaning":"気持ちがしっかりしていて、くじけないこと。","stage":3},{"id":114,"no":"114","term":"早晩","read":"そうばん","meaning":"遅かれ早かれ。いずれ。","stage":3},{"id":115,"no":"115","term":"幇間","read":"ほうかん","meaning":"客の機嫌を取り、宴席を盛り上げる職業の人。","stage":3},{"id":116,"no":"116","term":"暁通","read":"ぎょうつう","meaning":"物事を隅々まで詳しく知っていること。","stage":3},{"id":117,"no":"117","term":"姑息","read":"こそく","meaning":"一時しのぎ。その場しのぎ。","stage":3},{"id":118,"no":"118","term":"営営","read":"えいえい","meaning":"こつこつと、休まず励む様子。","stage":3},{"id":119,"no":"119","term":"恬淡","read":"てんたん","meaning":"欲がなく、あっさりしている様子。","stage":3},{"id":120,"no":"120","term":"闊達","read":"かったつ","meaning":"心が広く、小さなことにこだわらない様子。","stage":3},{"id":121,"no":"121","term":"馴致","read":"じゅんち","meaning":"徐々に慣れさせ、なじませること。","stage":3},{"id":122,"no":"122","term":"卓越","read":"たくえつ","meaning":"ほかよりはるかに優れていること。","stage":3},{"id":123,"no":"123","term":"涵養","read":"かんよう","meaning":"時間をかけ、少しずつ教え育てること。","stage":3},{"id":124,"no":"124","term":"伝播","read":"でんぱ","meaning":"伝わり、広がっていくこと。","stage":3},{"id":125,"no":"125","term":"煌煌","read":"こうこう","meaning":"光り輝く様子。","stage":3},{"id":126,"no":"126","term":"秘匿","read":"ひとく","meaning":"秘密にして、隠しておくこと。","stage":3},{"id":127,"no":"127","term":"奢侈","read":"しゃし","meaning":"度を越したぜいたく。","stage":3},{"id":128,"no":"128","term":"杞憂","read":"きゆう","meaning":"必要のない心配。取り越し苦労。","stage":3},{"id":129,"no":"129","term":"法外","read":"ほうがい","meaning":"普通の程度を大きく越えていること。","stage":3},{"id":130,"no":"130","term":"滔滔","read":"とうとう","meaning":"次から次へと、よどみなく話す様子。","stage":3},{"id":131,"no":"131","term":"蜿蜒","read":"えんえん","meaning":"うねうねと長く続く様子。","stage":3},{"id":132,"no":"132","term":"疎通","read":"そつう","meaning":"意思や考えが、支障なく相手に通じること。","stage":3},{"id":133,"no":"133","term":"直言","read":"ちょくげん","meaning":"自分の考えを、遠慮せず率直に言うこと。","stage":3},{"id":134,"no":"134","term":"進言","read":"しんげん","meaning":"目上の人に意見を述べること。","stage":3},{"id":135,"no":"135","term":"咀嚼","read":"そしゃく","meaning":"内容をよく考え、十分に理解して味わうこと。","stage":3},{"id":136,"no":"136","term":"歴然","read":"れきぜん","meaning":"はっきりしていて、疑う余地がない様子。","stage":3},{"id":137,"no":"137","term":"恭順","read":"きょうじゅん","meaning":"つつしんで命令などに従うこと。","stage":3},{"id":138,"no":"138","term":"大綱","read":"たいこう","meaning":"物事の根本や、おおまかな内容。","stage":3},{"id":139,"no":"139","term":"蹉跌","read":"さてつ","meaning":"物事がうまくいかず、失敗すること。","stage":3},{"id":140,"no":"140","term":"逓減","read":"ていげん","meaning":"だんだん少なくなること。","stage":3},{"id":141,"no":"141","term":"閨秀","read":"けいしゅう","meaning":"学問や芸術などに優れた女性。","stage":3},{"id":142,"no":"142","term":"意表","read":"いひょう","meaning":"予想していないこと。意外。","stage":3},{"id":143,"no":"143","term":"軋轢","read":"あつれき","meaning":"人や集団の間に生じる不和や摩擦。","stage":3},{"id":144,"no":"144","term":"労","read":"ろう","meaning":"苦労。努力。骨折り。","stage":3},{"id":145,"no":"145","term":"典拠","read":"てんきょ","meaning":"根拠となる文献や資料。","stage":3},{"id":146,"no":"146","term":"枢軸","read":"すうじく","meaning":"物事の中心となる重要な部分。","stage":3},{"id":147,"no":"147","term":"泰斗","read":"たいと","meaning":"ある分野で最も権威のある人。","stage":3},{"id":148,"no":"148","term":"比肩","read":"ひけん","meaning":"同等のものとして肩を並べること。","stage":3},{"id":149,"no":"149","term":"傾注","read":"けいちゅう","meaning":"力や気持ちを、一つのことに集中すること。","stage":3},{"id":150,"no":"150","term":"懸案","read":"けんあん","meaning":"問題になったまま、解決していない事柄。","stage":3},{"id":151,"no":"151","term":"宥和","read":"ゆうわ","meaning":"相手を許し、関係を和らげること。","stage":4},{"id":152,"no":"152","term":"遁走","read":"とんそう","meaning":"逃げ出すこと。","stage":4},{"id":153,"no":"153","term":"虚心","read":"きょしん","meaning":"先入観を持たず、素直な心でいること。","stage":4},{"id":154,"no":"154","term":"中原","read":"ちゅうげん","meaning":"国の中央。中心となる土地。","stage":4},{"id":155,"no":"155","term":"演繹","read":"えんえき","meaning":"一般的な原理から、個別の結論を導くこと。","stage":4},{"id":156,"no":"156","term":"知遇","read":"ちぐう","meaning":"能力を認められ、厚く扱われること。","stage":4},{"id":157,"no":"157","term":"失笑","read":"しっしょう","meaning":"思わず笑ってしまうこと。","stage":4},{"id":158,"no":"158","term":"斯界","read":"しかい","meaning":"この分野。この専門の世界。","stage":4},{"id":159,"no":"159","term":"耽読","read":"たんどく","meaning":"夢中になって読みふけること。","stage":4},{"id":160,"no":"160","term":"着着","read":"ちゃくちゃく","meaning":"物事が順調に進んでいる様子。","stage":4},{"id":161,"no":"161","term":"諸般","read":"しょはん","meaning":"いろいろ。さまざま。","stage":4},{"id":162,"no":"162","term":"這般","read":"しゃはん","meaning":"このたび。これら。この辺。","stage":4},{"id":163,"no":"163","term":"佳境","read":"かきょう","meaning":"物事が面白くなってきたところ。","stage":4},{"id":164,"no":"164","term":"気脈","read":"きみゃく","meaning":"気持ちのつながり。互いの連絡。","stage":4},{"id":165,"no":"165","term":"隠匿","read":"いんとく","meaning":"人に見つからないように隠すこと。","stage":4},{"id":166,"no":"166","term":"増長","read":"ぞうちょう","meaning":"次第にいい気になり、つけ上がること。","stage":4},{"id":167,"no":"167","term":"咽喉","read":"いんこう","meaning":"のど。転じて、交通などの重要な通路。","stage":4},{"id":168,"no":"168","term":"回視","read":"かいし","meaning":"過去を振り返ること。","stage":4},{"id":169,"no":"169","term":"看過","read":"かんか","meaning":"見逃すこと。見過ごすこと。","stage":4},{"id":170,"no":"170","term":"看破","read":"かんぱ","meaning":"隠された真相などを見抜くこと。","stage":4},{"id":171,"no":"171","term":"打診","read":"だしん","meaning":"相手の反応や意向を、事前に探ること。","stage":4},{"id":172,"no":"172","term":"標榜","read":"ひょうぼう","meaning":"主義や主張などを、公然と掲げること。","stage":4},{"id":173,"no":"173","term":"排斥","read":"はいせき","meaning":"好ましくないとして、拒み退けること。","stage":4},{"id":174,"no":"174","term":"峻別","read":"しゅんべつ","meaning":"厳しく、はっきり区別すること。","stage":4},{"id":175,"no":"175","term":"吹聴","read":"ふいちょう","meaning":"言いふらし、言い広めること。","stage":4},{"id":176,"no":"176","term":"寡聞","read":"かぶん","meaning":"見聞が狭く、知識が少ないこと。","stage":4},{"id":177,"no":"177","term":"肝要","read":"かんよう","meaning":"非常に大切であること。","stage":4},{"id":178,"no":"178","term":"消長","read":"しょうちょう","meaning":"勢いが衰えたり、盛んになったりすること。","stage":4},{"id":179,"no":"179","term":"遜色","read":"そんしょく","meaning":"ほかと比べて劣っていること。","stage":4},{"id":180,"no":"180","term":"卑近","read":"ひきん","meaning":"身近で、ありふれていること。","stage":4},{"id":181,"no":"181","term":"腐心","read":"ふしん","meaning":"ある事を成し遂げようと、心を砕いて苦労すること。","stage":4},{"id":182,"no":"182","term":"内内","read":"ないない","meaning":"表立てず、ひそかに行う様子。","stage":4},{"id":183,"no":"183","term":"憐憫","read":"れんびん","meaning":"かわいそうに思い、あわれむこと。","stage":4},{"id":184,"no":"184","term":"造詣","read":"ぞうけい","meaning":"ある分野の深い知識や、優れた技量。","stage":4},{"id":185,"no":"185","term":"閉口","read":"へいこう","meaning":"手に負えず、困り果てること。","stage":4},{"id":186,"no":"186","term":"喧伝","read":"けんでん","meaning":"盛んに言い広め、世間に知らせること。","stage":4},{"id":187,"no":"187","term":"漸次","read":"ぜんじ","meaning":"だんだん。次第に。","stage":4},{"id":188,"no":"188","term":"漸進","read":"ぜんしん","meaning":"少しずつ進むこと。","stage":4},{"id":189,"no":"189","term":"招致","read":"しょうち","meaning":"招き寄せること。","stage":4},{"id":190,"no":"190","term":"委細","read":"いさい","meaning":"詳しい事情。細かな内容。","stage":4},{"id":191,"no":"191","term":"英気","read":"えいき","meaning":"物事に取り組む元気。優れた気質。","stage":4},{"id":192,"no":"192","term":"市井","read":"しせい","meaning":"人家が集まる所。まちなか。一般の人々の社会。","stage":4},{"id":193,"no":"193","term":"披瀝","read":"ひれき","meaning":"考えや気持ちを隠さず打ち明けること。","stage":4},{"id":194,"no":"194","term":"露呈","read":"ろてい","meaning":"隠れていた事実や真相が表に出ること。","stage":4},{"id":195,"no":"195","term":"謬見","read":"びゅうけん","meaning":"誤った意見や考え。","stage":4},{"id":196,"no":"196","term":"出色","read":"しゅっしょく","meaning":"ほかより目立って優れていること。","stage":4},{"id":197,"no":"197","term":"異彩","read":"いさい","meaning":"普通とは異なり、際立って見える様子。","stage":4},{"id":198,"no":"198","term":"折衷","read":"せっちゅう","meaning":"それぞれのよい点を取り、一つにまとめること。","stage":4},{"id":199,"no":"199","term":"折半","read":"せっぱん","meaning":"半分ずつに分けること。","stage":4},{"id":200,"no":"200","term":"度外視","read":"どがいし","meaning":"まったく考慮せず、問題にしないこと。","stage":4},{"id":201,"no":"201","term":"辟易","read":"へきえき","meaning":"うんざりして、嫌になること。","stage":4},{"id":202,"no":"202","term":"予見","read":"よけん","meaning":"前もって見通すこと。","stage":4},{"id":203,"no":"203","term":"畏敬","read":"いけい","meaning":"恐れ敬い、かしこまること。","stage":4},{"id":204,"no":"204","term":"研鑽","read":"けんさん","meaning":"学問や技芸などを深く究めること。","stage":4},{"id":205,"no":"205","term":"逆鱗に触れる","read":"げきりん","meaning":"目上の人を激しく怒らせること。","stage":4},{"id":206,"no":"206","term":"緊迫","read":"きんぱく","meaning":"情勢が差し迫り、緊張していること。","stage":4},{"id":207,"no":"207","term":"僥倖","read":"ぎょうこう","meaning":"思いがけない幸運。","stage":4},{"id":208,"no":"208","term":"隘路","read":"あいろ","meaning":"狭い道。物事を進める上での障害。","stage":4},{"id":209,"no":"209","term":"愁眉","read":"しゅうび","meaning":"心配そうな顔。憂いを含んだ表情。","stage":4},{"id":210,"no":"210","term":"焦眉の急","read":"しょうび","meaning":"すぐ目の前に迫った危険や急務。","stage":4},{"id":211,"no":"211","term":"一瞥","read":"いちべつ","meaning":"ちらっと見ること。","stage":4},{"id":212,"no":"212","term":"薫陶","read":"くんとう","meaning":"人格や品性によって感化し、よい方へ導くこと。","stage":4},{"id":213,"no":"213","term":"随意","read":"ずいい","meaning":"制限を受けず、思いのままにすること。","stage":4},{"id":214,"no":"214","term":"恣意","read":"しい","meaning":"自分勝手な考えや判断。","stage":4},{"id":215,"no":"215","term":"桎梏","read":"しっこく","meaning":"行動や自由を束縛するもの。","stage":4},{"id":216,"no":"216","term":"洒脱","read":"しゃだつ","meaning":"気取らずさっぱりとして、洗練されていること。","stage":4},{"id":217,"no":"217","term":"収斂","read":"しゅうれん","meaning":"一つにまとまり、縮まること。","stage":4},{"id":218,"no":"218","term":"浚渫","read":"しゅんせつ","meaning":"川や海の底の土砂を掘り取り、深くすること。","stage":4},{"id":219,"no":"219","term":"子細","read":"しさい","meaning":"物事の詳しい事情。","stage":4},{"id":220,"no":"220","term":"粗忽","read":"そこつ","meaning":"軽はずみで、そそっかしいこと。","stage":4},{"id":221,"no":"221","term":"齟齬","read":"そご","meaning":"物事が食い違い、かみ合わないこと。","stage":5},{"id":222,"no":"222","term":"糊塗","read":"こと","meaning":"一時しのぎにごまかし、取り繕うこと。","stage":5},{"id":223,"no":"223","term":"奉職","read":"ほうしょく","meaning":"公的な職務に就くこと。","stage":5},{"id":224,"no":"224","term":"懐柔","read":"かいじゅう","meaning":"うまく手なずけて、自分に従わせること。","stage":5},{"id":225,"no":"225","term":"籠絡","read":"ろうらく","meaning":"巧みに丸め込み、思い通りに操ること。","stage":5},{"id":226,"no":"226","term":"重畳","read":"ちょうじょう","meaning":"物事が重なること。特に、喜ばしいことが重なること。","stage":5},{"id":227,"no":"227","term":"端緒","read":"たんしょ","meaning":"物事の始まり。解決などの手掛かり。","stage":5},{"id":228,"no":"228","term":"依拠","read":"いきょ","meaning":"よりどころとすること。","stage":5},{"id":229,"no":"229","term":"頓挫","read":"とんざ","meaning":"物事の進行が、急に行き詰まること。","stage":5},{"id":230,"no":"230","term":"獰悪","read":"どうあく","meaning":"性質や姿が凶悪で、荒々しいこと。","stage":5},{"id":231,"no":"231","term":"角を立てる","read":"かどをたてる","meaning":"言動によって、相手との間に波風を立てること。","stage":5},{"id":232,"no":"232","term":"識見","read":"しきけん","meaning":"物事を正しく判断する力。","stage":5},{"id":233,"no":"233","term":"溜飲を下げる","read":"りゅういんをさげる","meaning":"不満や胸のつかえを晴らすこと。","stage":5},{"id":234,"no":"234","term":"符合","read":"ふごう","meaning":"二つ以上の事柄が、ぴったり一致すること。","stage":5},{"id":235,"no":"235","term":"猜疑","read":"さいぎ","meaning":"裏があるのではないかと疑うこと。","stage":5},{"id":236,"no":"236","term":"派遣","read":"はけん","meaning":"任務を与えて、ある場所へ行かせること。対義語は召還。","stage":5},{"id":237,"no":"237","term":"召還","read":"しょうかん","meaning":"派遣した人を呼び戻すこと。","stage":5},{"id":238,"no":"238","term":"召集","read":"しょうしゅう","meaning":"人を呼び集めること。召還との違いに注意。","stage":5},{"id":239,"no":"239","term":"在野","read":"ざいや","meaning":"公職に就かず、民間にいること。","stage":5},{"id":240,"no":"240","term":"文壇","read":"ぶんだん","meaning":"作家や評論家などが活動する世界。","stage":5},{"id":241,"no":"241","term":"法曹界","read":"ほうそうかい","meaning":"裁判官・検察官・弁護士などの世界。","stage":5},{"id":242,"no":"242","term":"独自性","read":"どくじせい","meaning":"ほかとは異なる、そのもの特有の性質。","stage":5},{"id":243,"no":"243","term":"類似性","read":"るいじせい","meaning":"互いに似ている性質。","stage":5},{"id":244,"no":"244","term":"捕獲","read":"ほかく","meaning":"獲物などを捕まえること。","stage":5},{"id":245,"no":"245","term":"主菜","read":"しゅさい","meaning":"食事の中心となるおかず。","stage":5},{"id":246,"no":"246","term":"甲板","read":"かんぱん","meaning":"船の上部にある、平らな床。","stage":5},{"id":247,"no":"247","term":"過失","read":"かしつ","meaning":"不注意などによる過ち。対義語は故意。","stage":5},{"id":248,"no":"248","term":"故意","read":"こい","meaning":"わざとすること。","stage":5},{"id":249,"no":"249","term":"漠然","read":"ばくぜん","meaning":"ぼんやりして、はっきりしない様子。","stage":5},{"id":250,"no":"250","term":"判然","read":"はんぜん","meaning":"はっきりしている様子。漠然の対義語。","stage":5},{"id":251,"no":"251","term":"濾過","read":"ろか","meaning":"液体や気体をこして、混じった固形物を除くこと。","stage":5},{"id":252,"no":"252","term":"確執","read":"かくしつ","meaning":"互いに意見を譲らずに争うこと。不和。","stage":5},{"id":253,"no":"253","term":"反目","read":"はんもく","meaning":"互いに仲が悪く、対立すること。","stage":5},{"id":254,"no":"254","term":"精通","read":"せいつう","meaning":"ある物事を詳しく知っていること。","stage":5},{"id":255,"no":"255","term":"知悉","read":"ちしつ","meaning":"詳しく知り尽くすこと。","stage":5},{"id":256,"no":"256","term":"皮相","read":"ひそう","meaning":"物事のうわべだけを見ること。","stage":5},{"id":257,"no":"257","term":"本質","read":"ほんしつ","meaning":"物事の根本的な性質。","stage":5},{"id":258,"no":"258","term":"帰納","read":"きのう","meaning":"個々の事実から、一般的な法則を導くこと。演繹と対になる。","stage":5},{"id":259,"no":"259","term":"家禽","read":"かきん","meaning":"家畜として飼う鳥。","stage":5},{"id":260,"no":"260","term":"嗜好品","read":"しこうひん","meaning":"栄養のためより、味や香りなどを楽しむ飲食物。","stage":5},{"id":261,"no":"261","term":"多弁","read":"たべん","meaning":"口数が多いこと。対義語は寡黙。","stage":5},{"id":262,"no":"262","term":"寡黙","read":"かもく","meaning":"口数が少ないこと。","stage":5},{"id":263,"no":"263","term":"懸念","read":"けねん","meaning":"気にかけて心配すること。","stage":5},{"id":264,"no":"264","term":"衰亡","read":"すいぼう","meaning":"勢いが衰えて滅びること。","stage":5},{"id":265,"no":"265","term":"興隆","read":"こうりゅう","meaning":"勢いが盛んになり、栄えること。","stage":5},{"id":266,"no":"266","term":"寄与","read":"きよ","meaning":"ある物事のために役立つこと。","stage":5},{"id":267,"no":"267","term":"貢献","read":"こうけん","meaning":"力を尽くして、役立つこと。","stage":5},{"id":268,"no":"268","term":"廉価","read":"れんか","meaning":"値段が安いこと。","stage":5},{"id":269,"no":"269","term":"うつつ","read":"現","meaning":"現実。夢に対する、現実の世界。","stage":5},{"id":270,"no":"270","term":"出納","read":"すいとう","meaning":"金銭や物品を出し入れすること。","stage":5},{"id":271,"no":"271","term":"敬称","read":"けいしょう","meaning":"相手への敬意を表す呼び名。","stage":5},{"id":272,"no":"272","term":"知己","read":"ちき","meaning":"自分をよく知っている人。知り合い。","stage":5},{"id":273,"no":"273","term":"起工","read":"きこう","meaning":"工事を始めること。対義語は竣工。","stage":5},{"id":274,"no":"274","term":"竣工","read":"しゅんこう","meaning":"工事が終わること。","stage":5},{"id":275,"no":"275","term":"めでる","read":"愛でる","meaning":"美しさや優れた点を味わい、ほめること。","stage":5},{"id":276,"no":"276","term":"侮る","read":"あなどる","meaning":"相手を軽く見て、見下すこと。","stage":5},{"id":277,"no":"277","term":"畏れる","read":"おそれる","meaning":"相手の力や威厳に対し、恐れや敬いを感じること。","stage":5},{"id":278,"no":"278","term":"座視","read":"ざし","meaning":"見ているだけで、手を出さないこと。傍観。","stage":5},{"id":279,"no":"279","term":"鳥瞰","read":"ちょうかん","meaning":"高い所から見下ろすこと。全体を見渡すこと。","stage":5},{"id":280,"no":"280","term":"俯瞰","read":"ふかん","meaning":"高い所から見下ろすこと。全体を広く捉えること。","stage":5},{"id":281,"no":"281","term":"玄人","read":"くろうと","meaning":"その分野を職業とする、熟練した人。","stage":5},{"id":282,"no":"282","term":"退廃","read":"たいはい","meaning":"健全さを失い、風紀などが乱れること。","stage":5},{"id":283,"no":"283","term":"拡散","read":"かくさん","meaning":"広がり散ること。対義語は収束。","stage":5},{"id":284,"no":"284","term":"収束","read":"しゅうそく","meaning":"一つにまとまって収まること。","stage":5},{"id":285,"no":"285","term":"訥弁","read":"とつべん","meaning":"つかえがちで、滑らかでない話し方。","stage":5},{"id":286,"no":"286","term":"能弁","read":"のうべん","meaning":"巧みで、よどみのない話し方。","stage":5},{"id":287,"no":"287","term":"弛緩","read":"しかん","meaning":"緩むこと。緊張が解けること。","stage":5},{"id":288,"no":"288","term":"ぐずる","read":"","meaning":"子どもなどが機嫌を悪くして泣いたり、むずかったりすること。","stage":5},{"id":289,"no":"289","term":"たじろぐ","read":"","meaning":"圧倒され、ひるむこと。","stage":5},{"id":290,"no":"290","term":"いそしむ","read":"勤しむ","meaning":"熱心に努め励むこと。","stage":5},{"id":291,"no":"291","term":"いぶかる","read":"訝る","meaning":"様子が変だと思い、疑うこと。","stage":5},{"id":292,"no":"292","term":"厚顔","read":"こうがん","meaning":"厚かましく、恥を恥と思わないこと。鉄面皮。","stage":5},{"id":293,"no":"293","term":"遠心","read":"えんしん","meaning":"中心から遠ざかろうとすること。","stage":5},{"id":294,"no":"294","term":"求心","read":"きゅうしん","meaning":"中心へ近づこうとすること。","stage":5},{"id":295,"no":"295","term":"身に余る","read":"みにあまる","meaning":"自分の身分や能力に対して、よすぎること。","stage":5},{"id":296,"no":"296","term":"過分","read":"かぶん","meaning":"自分の身分や分際を越えていること。","stage":5},{"id":297,"no":"297","term":"役不足","read":"やくぶそく","meaning":"本人の能力に比べて、役目が軽すぎること。","stage":5},{"id":298,"no":"298","term":"概して","read":"がいして","meaning":"大体の傾向として。おおむね。","stage":5},{"id":299,"no":"299","term":"おしなべて","read":"","meaning":"全体的に。総じて。","stage":5},{"id":300,"no":"300","term":"すべからく","read":"","meaning":"当然なすべきこととして。「すべて」の意味ではない。","stage":5},{"id":301,"no":"301","term":"拘束","read":"こうそく","meaning":"行動や考えの自由を制限すること。","stage":6},{"id":302,"no":"302","term":"熟慮","read":"じゅくりょ","meaning":"十分に、よく考えること。","stage":6},{"id":303,"no":"303","term":"悔悟","read":"かいご","meaning":"自分の過ちを認め、後悔すること。","stage":6},{"id":304,"no":"304","term":"耽溺","read":"たんでき","meaning":"あることに夢中になり、溺れること。","stage":6},{"id":305,"no":"305","term":"不断","read":"ふだん","meaning":"決断できないこと（優柔不断）。別の意味では、絶えず続くこと。","stage":6},{"id":306,"no":"306","term":"遅延","read":"ちえん","meaning":"予定より遅れること。長引くこと。","stage":6},{"id":307,"no":"307","term":"悠然","read":"ゆうぜん","meaning":"ゆったりと落ち着いている様子。","stage":6},{"id":308,"no":"308","term":"古参","read":"こさん","meaning":"昔からその職や立場にいること。その人。","stage":6},{"id":309,"no":"309","term":"古株","read":"ふるかぶ","meaning":"集団に古くからいる人。","stage":6},{"id":310,"no":"310","term":"子飼い","read":"こがい","meaning":"未熟なうちから、自分のもとで育てること。その人。","stage":6},{"id":311,"no":"311","term":"えり抜き","read":"","meaning":"多くの中から、優れたものを選び出すこと。","stage":6},{"id":312,"no":"312","term":"粗悪","read":"そあく","meaning":"品質が悪いこと。","stage":6},{"id":313,"no":"313","term":"粗漏","read":"そろう","meaning":"大ざっぱで、手落ちがあること。","stage":6},{"id":314,"no":"314","term":"粗製","read":"そせい","meaning":"作り方が粗雑なこと。","stage":6},{"id":315,"no":"315","term":"粗野","read":"そや","meaning":"言動などが荒く、洗練されていないこと。","stage":6},{"id":316,"no":"316","term":"協議","read":"きょうぎ","meaning":"集まって相談すること。","stage":6},{"id":317,"no":"317","term":"審議","read":"しんぎ","meaning":"詳しく調べ、よしあしや可否を話し合うこと。","stage":6},{"id":318,"no":"318","term":"稟議","read":"りんぎ","meaning":"関係者に文書を回し、承認を得ること。","stage":6},{"id":319,"no":"319","term":"散漫","read":"さんまん","meaning":"まとまりや集中がないこと。","stage":6},{"id":320,"no":"320","term":"蛇足","read":"だそく","meaning":"付け加える必要のない、余計なもの。","stage":6},{"id":321,"no":"321","term":"漫然","read":"まんぜん","meaning":"はっきりした目的や意識がなく、ぼんやりしている様子。","stage":6},{"id":322,"no":"322","term":"放漫","read":"ほうまん","meaning":"しまりがなく、いい加減なこと。","stage":6},{"id":323,"no":"323","term":"ひいき","read":"贔屓","meaning":"気に入った人を、特別に引き立てること。","stage":6},{"id":324,"no":"324","term":"大雑把","read":"おおざっぱ","meaning":"細かなところにこだわらず、粗く捉えること。","stage":6},{"id":325,"no":"325","term":"知らん顔","read":"しらんかお","meaning":"知っていても、知らないふりをすること。","stage":6},{"id":326,"no":"326","term":"反駁","read":"はんばく","meaning":"相手の主張に反対し、論じ返すこと。","stage":6},{"id":327,"no":"327","term":"弁駁","read":"べんばく","meaning":"相手の誤りを指摘し、論じて攻撃すること。","stage":6},{"id":328,"no":"328","term":"応戦","read":"おうせん","meaning":"相手の攻撃に対して、戦い返すこと。","stage":6},{"id":329,"no":"329","term":"嘱望","read":"しょくぼう","meaning":"将来に期待をかけること。","stage":6},{"id":330,"no":"330","term":"宿願","read":"しゅくがん","meaning":"以前から抱き続けている願い。","stage":6},{"id":331,"no":"331","term":"待望","read":"たいぼう","meaning":"実現などを待ち望むこと。","stage":6},{"id":332,"no":"332","term":"貪欲","read":"どんよく","meaning":"非常に欲が深いこと。","stage":6},{"id":333,"no":"333","term":"おざなり","read":"","meaning":"その場しのぎに、いい加減な対応をすること。","stage":6},{"id":334,"no":"334","term":"怪訝","read":"けげん","meaning":"事情が分からず、不思議に思うこと。","stage":6},{"id":335,"no":"335","term":"不測","read":"ふそく","meaning":"予想できないこと。","stage":6},{"id":336,"no":"336","term":"不慮","read":"ふりょ","meaning":"思いがけないこと。","stage":6},{"id":337,"no":"337","term":"算段","read":"さんだん","meaning":"方法を考え、都合をつけること。","stage":6},{"id":338,"no":"338","term":"皮算用","read":"かわざんよう","meaning":"まだ実現していない利益などを当てにして計画すること。","stage":6},{"id":339,"no":"339","term":"目論見","read":"もくろみ","meaning":"計画。企て。","stage":6},{"id":340,"no":"340","term":"横柄","read":"おうへい","meaning":"人を見下し、偉そうに振る舞う様子。","stage":6},{"id":341,"no":"341","term":"不精","read":"ぶしょう","meaning":"面倒くさがり、物事をしたがらないこと。","stage":6},{"id":342,"no":"342","term":"慢心","read":"まんしん","meaning":"自分を過信し、おごり高ぶること。","stage":6},{"id":343,"no":"343","term":"飽食","read":"ほうしょく","meaning":"十分に食べ、食べ物に不自由しないこと。","stage":6},{"id":344,"no":"344","term":"蚕食","read":"さんしょく","meaning":"他人の領域を、端から少しずつ侵略すること。","stage":6},{"id":345,"no":"345","term":"徒食","read":"としょく","meaning":"働かずに遊び暮らすこと。","stage":6},{"id":346,"no":"346","term":"必須","read":"ひっす","meaning":"必ず必要とされること。","stage":6},{"id":347,"no":"347","term":"逼迫","read":"ひっぱく","meaning":"行き詰まり、余裕がなくなること。","stage":6},{"id":348,"no":"348","term":"必死","read":"ひっし","meaning":"死ぬ覚悟で全力を尽くすこと。必至と区別。","stage":6},{"id":349,"no":"349","term":"けなげ","read":"健気","meaning":"困難にも負けず、しっかり頑張る様子。","stage":6},{"id":350,"no":"350","term":"ひたむき","read":"","meaning":"一つのことに、心を集中する様子。","stage":6},{"id":351,"no":"351","term":"やみくも","read":"","meaning":"見通しや考えもなく、むやみに行う様子。","stage":6},{"id":352,"no":"352","term":"てんてこまい","read":"","meaning":"忙しさなどで、慌てて動き回ること。","stage":6},{"id":353,"no":"353","term":"与る","read":"あずかる","meaning":"物事に関わること。恩恵や分け前を受けること。","stage":6},{"id":354,"no":"354","term":"供する","read":"きょうする","meaning":"差し出すこと。役立てるために提供すること。","stage":6},{"id":355,"no":"355","term":"充てる","read":"あてる","meaning":"ある用途や役目に振り向けること。","stage":6},{"id":356,"no":"356","term":"目算","read":"もくさん","meaning":"見込み。計画。","stage":6},{"id":357,"no":"357","term":"概算","read":"がいさん","meaning":"おおよその計算。","stage":6},{"id":358,"no":"358","term":"試算","read":"しさん","meaning":"試しに行う計算。","stage":6},{"id":359,"no":"359","term":"打算","read":"ださん","meaning":"自分にとっての損得を見積もること。","stage":6},{"id":360,"no":"360","term":"あげつらう","read":"","meaning":"細かな欠点や短所を取り上げて、言い立てること。","stage":6},{"id":361,"no":"361","term":"かしずく","read":"","meaning":"人に仕え、世話をすること。","stage":6},{"id":362,"no":"362","term":"たまわる","read":"賜る","meaning":"「もらう」の謙譲語。また「与える」の尊敬語。","stage":6},{"id":363,"no":"363","term":"そよぐ","read":"","meaning":"風に吹かれ、草木などがかすかに揺れること。","stage":6},{"id":364,"no":"364","term":"はためく","read":"","meaning":"旗などが、風で音を立てて揺れること。","stage":6},{"id":365,"no":"365","term":"利発","read":"りはつ","meaning":"頭の働きがよく、賢いこと。","stage":6},{"id":366,"no":"366","term":"小利口","read":"こりこう","meaning":"目先のことによく気がつき、抜け目がないこと。","stage":6},{"id":367,"no":"367","term":"半可通","read":"はんかつう","meaning":"中途半端な知識で、通じているふりをすること。","stage":6},{"id":368,"no":"368","term":"暴露","read":"ばくろ","meaning":"秘密や悪事を明るみに出すこと。","stage":6},{"id":369,"no":"369","term":"あか抜け","read":"","meaning":"言動や姿が洗練されていること。","stage":6},{"id":370,"no":"370","term":"つつ抜け","read":"","meaning":"内緒の話が、そのまま外部に漏れてしまうこと。","stage":6},{"id":371,"no":"371","term":"気に病む","read":"","meaning":"気にかけ、悩むこと。","stage":6},{"id":372,"no":"372","term":"手をこまねく","read":"","meaning":"何もしないで、ただ見ていること。","stage":6},{"id":373,"no":"373","term":"頭をたれる","read":"こうべをたれる","meaning":"頭を下げ、謙虚な態度になること。","stage":6},{"id":374,"no":"374","term":"細やか","read":"こまやか","meaning":"きめ細かく、行き届いている様子。","stage":6},{"id":375,"no":"375","term":"際やか","read":"きわやか","meaning":"くっきりと際立っている様子。","stage":6},{"id":376,"no":"376","term":"あくどい","read":"","meaning":"度を越していて、たちが悪い様子。","stage":6},{"id":377,"no":"377","term":"すげない","read":"","meaning":"思いやりがなく、冷淡な様子。","stage":6},{"id":378,"no":"378","term":"はかばかしい","read":"","meaning":"物事が順調に進み、期待に沿う様子。","stage":6},{"id":379,"no":"379","term":"かいがいしい","read":"","meaning":"きびきびと、熱心に働く様子。","stage":6},{"id":380,"no":"380","term":"あまつさえ","read":"","meaning":"その上さらに。おまけに。","stage":6},{"id":381,"no":"381","term":"いみじくも","read":"","meaning":"まさに適切に。実に巧みに。","stage":6},{"id":382,"no":"382","term":"さしずめ","read":"","meaning":"結局のところ。また、今のところ。","stage":6},{"id":383,"no":"383","term":"はなはだ","read":"","meaning":"非常に。たいへん。","stage":6},{"id":384,"no":"384","term":"かかりきる","read":"","meaning":"一つのことに、時間や力をすべて注ぐこと。","stage":6},{"id":385,"no":"385","term":"なおざり","read":"","meaning":"注意を払わず、おろそかにすること。","stage":6},{"id":386,"no":"386","term":"はがゆい","read":"","meaning":"思い通りにいかず、いらだたしいこと。","stage":6},{"id":387,"no":"387","term":"もどかしい","read":"","meaning":"物事が思うように進まず、じれったいこと。","stage":6},{"id":388,"no":"388","term":"後ろめたい","read":"うしろめたい","meaning":"悪いことをした意識があり、気がとがめること。","stage":6},{"id":389,"no":"389","term":"ふがいない","read":"","meaning":"意気地がなく、情けないこと。","stage":6},{"id":390,"no":"390","term":"水をさす","read":"","meaning":"順調に進んでいることや、よい関係を邪魔すること。","stage":6},{"id":391,"no":"391","term":"手を回す","read":"","meaning":"目的のため、ひそかに準備や働きかけをすること。","stage":6},{"id":392,"no":"392","term":"呼び水","read":"よびみず","meaning":"ある物事を起こす、きっかけとなるもの。","stage":6},{"id":393,"no":"393","term":"忌憚ない","read":"きたんない","meaning":"遠慮やためらいがないこと。","stage":6},{"id":394,"no":"394","term":"如才ない","read":"じょさいない","meaning":"気が利き、手抜かりがないこと。","stage":6},{"id":395,"no":"395","term":"抜き差しならない","read":"","meaning":"身動きが取れず、どうしようもないこと。","stage":6},{"id":396,"no":"396","term":"滅相ない","read":"めっそうない","meaning":"とんでもないこと。","stage":6},{"id":397,"no":"397","term":"架橋","read":"かきょう","meaning":"橋を架けること。","stage":7},{"id":398,"no":"398","term":"圧巻","read":"あっかん","meaning":"全体の中で、特に優れた部分。","stage":7},{"id":399,"no":"399","term":"錠剤","read":"じょうざい","meaning":"一定の形に固めた薬。","stage":7},{"id":400,"no":"400","term":"理非","read":"りひ","meaning":"道理に合うことと、合わないこと。","stage":7},{"id":401,"no":"401","term":"禍福","read":"かふく","meaning":"災いと幸福。","stage":7},{"id":402,"no":"402","term":"誤謬","read":"ごびゅう","meaning":"誤り。間違い。","stage":7},{"id":403,"no":"403","term":"炉辺","read":"ろへん","meaning":"いろりや暖炉のそば。","stage":7},{"id":404,"no":"404","term":"留意","read":"りゅうい","meaning":"心に留め、気をつけること。","stage":7},{"id":405,"no":"405","term":"媒介","read":"ばいかい","meaning":"二つの間に入り、つなぐ働きをすること。","stage":7},{"id":406,"no":"406","term":"安穏","read":"あんのん","meaning":"穏やかで、心が落ち着いていること。","stage":7},{"id":407,"no":"407","term":"壮観","read":"そうかん","meaning":"規模が大きく、見事な眺め。","stage":7},{"id":408,"no":"408","term":"匿名","read":"とくめい","meaning":"本名を隠すこと。","stage":7},{"id":409,"no":"409","term":"午睡","read":"ごすい","meaning":"昼寝。","stage":7},{"id":410,"no":"410","term":"霧散","read":"むさん","meaning":"霧が散るように、跡形もなく消えること。","stage":7},{"id":411,"no":"411","term":"真贋","read":"しんがん","meaning":"本物と偽物。","stage":7},{"id":412,"no":"412","term":"懐古","read":"かいこ","meaning":"昔を懐かしむこと。","stage":7},{"id":413,"no":"413","term":"我流","read":"がりゅう","meaning":"自分独自のやり方。","stage":7},{"id":414,"no":"414","term":"需給","read":"じゅきゅう","meaning":"需要と供給。","stage":7},{"id":415,"no":"415","term":"賢明","read":"けんめい","meaning":"賢く、判断が適切なこと。","stage":7},{"id":416,"no":"416","term":"逸話","read":"いつわ","meaning":"ある人などについての、あまり知られていない話。","stage":7},{"id":417,"no":"417","term":"赤貧","read":"せきひん","meaning":"非常に貧しいこと。","stage":7},{"id":418,"no":"418","term":"断念","read":"だんねん","meaning":"諦めて、思いを断ち切ること。","stage":7},{"id":419,"no":"419","term":"催促","read":"さいそく","meaning":"早くするように促すこと。","stage":7},{"id":420,"no":"420","term":"空疎","read":"くうそ","meaning":"中身がなく、内容に乏しいこと。","stage":7},{"id":421,"no":"421","term":"天賦","read":"てんぷ","meaning":"生まれながらに備わっていること。","stage":7},{"id":422,"no":"422","term":"衰微","read":"すいび","meaning":"勢いが衰え、弱くなること。","stage":7},{"id":423,"no":"423","term":"顕示","read":"けんじ","meaning":"はっきり示すこと。","stage":7},{"id":424,"no":"424","term":"隔離","read":"かくり","meaning":"ほかから引き離すこと。","stage":7},{"id":425,"no":"425","term":"添削","read":"てんさく","meaning":"文章を加えたり削ったりして直すこと。","stage":7},{"id":426,"no":"426","term":"邪推","read":"じゃすい","meaning":"相手の言動を、悪い意味に推測すること。","stage":7},{"id":427,"no":"427","term":"加筆","read":"かひつ","meaning":"文章などに、書き加えること。","stage":7},{"id":428,"no":"428","term":"抑揚","read":"よくよう","meaning":"声の調子などを上げたり下げたりすること。","stage":7},{"id":429,"no":"429","term":"策略","read":"さくりゃく","meaning":"目的を達成するための計略。","stage":7},{"id":430,"no":"430","term":"稽古","read":"けいこ","meaning":"芸事や技術などを学び、練習すること。","stage":7},{"id":431,"no":"431","term":"融資","read":"ゆうし","meaning":"必要な資金を貸すこと。","stage":7},{"id":432,"no":"432","term":"功罪","read":"こうざい","meaning":"よい働きと、悪い影響。","stage":7},{"id":433,"no":"433","term":"挑戦","read":"ちょうせん","meaning":"戦いを挑むこと。難しいことに取り組むこと。","stage":7},{"id":434,"no":"434","term":"偽造","read":"ぎぞう","meaning":"本物に似せて、偽物を作ること。","stage":7},{"id":435,"no":"435","term":"多寡","read":"たか","meaning":"多いことと少ないこと。","stage":7},{"id":436,"no":"436","term":"承諾","read":"しょうだく","meaning":"申し出を受け入れること。","stage":7},{"id":437,"no":"437","term":"天誅","read":"てんちゅう","meaning":"天が下す罰。","stage":7},{"id":438,"no":"438","term":"主従","read":"しゅじゅう","meaning":"主人と従者。主君と家来。","stage":7},{"id":439,"no":"439","term":"反映","read":"はんえい","meaning":"影響や性質が、ほかに及んで現れること。","stage":7},{"id":440,"no":"440","term":"遺失","read":"いしつ","meaning":"置き忘れたり、落としたりして失うこと。","stage":7},{"id":441,"no":"441","term":"養蚕","read":"ようさん","meaning":"蚕を飼育すること。","stage":7},{"id":442,"no":"442","term":"巧拙","read":"こうせつ","meaning":"上手であることと、下手であること。","stage":7},{"id":443,"no":"443","term":"遅遅","read":"ちち","meaning":"物事の進み方が遅い様子。","stage":7},{"id":444,"no":"444","term":"延延","read":"えんえん","meaning":"非常に長く続く様子。","stage":7},{"id":445,"no":"445","term":"杳として","read":"ようとして","meaning":"事情や行方などが、はっきり分からない様子。","stage":7},{"id":446,"no":"446","term":"草分け","read":"くさわけ","meaning":"ある分野を最初に切り開いた人。先駆者。","stage":7},{"id":447,"no":"447","term":"しんがり","read":"殿","meaning":"隊列や順番の一番後ろ。","stage":7},{"id":448,"no":"448","term":"筆頭","read":"ひっとう","meaning":"名簿などの最初。第一番。","stage":7},{"id":449,"no":"449","term":"皮切り","read":"かわきり","meaning":"物事の始まり。手始め。","stage":7},{"id":450,"no":"450","term":"口開け","read":"くちあけ","meaning":"物事の最初。","stage":7},{"id":451,"no":"451","term":"様相を呈する","read":"ようそうをていする","meaning":"ある様子や状態を示すこと。","stage":7},{"id":452,"no":"452","term":"活況を呈する","read":"かっきょうをていする","meaning":"活気のある、盛んな状態になること。","stage":7},{"id":453,"no":"453","term":"苦言を呈する","read":"くげんをていする","meaning":"相手のために、聞きづらい忠告をすること。","stage":7},{"id":454,"no":"454","term":"双肩に担う","read":"そうけんにになう","meaning":"責任などを引き受け、背負うこと。","stage":7},{"id":455,"no":"455","term":"矯正","read":"きょうせい","meaning":"欠点や悪い習慣などを正すこと。","stage":7},{"id":456,"no":"456","term":"改正","read":"かいせい","meaning":"法律や規則などの、不備を直すこと。","stage":7},{"id":457,"no":"457","term":"校正","read":"こうせい","meaning":"文字や文章の誤りを確認し、正すこと。","stage":7},{"id":458,"no":"458","term":"応酬","read":"おうしゅう","meaning":"言葉などを、互いにやり取りすること。","stage":7},{"id":459,"no":"459","term":"万感胸に迫る","read":"ばんかんむねにせまる","meaning":"さまざまな思いが、胸いっぱいに込み上げること。","stage":7},{"id":460,"no":"460","term":"おいそれと","read":"","meaning":"打ち消しを伴い、すぐに・気軽に・簡単には、の意味。","stage":7},{"id":461,"no":"461","term":"感慨にふける","read":"かんがいにふける","meaning":"深く心に感じ、しみじみと思いに沈むこと。","stage":7},{"id":462,"no":"462","term":"感極まる","read":"かんきわまる","meaning":"感動が抑えきれないほどになること。","stage":7},{"id":463,"no":"463","term":"感涙にむせぶ","read":"かんるいにむせぶ","meaning":"感動して、息が詰まるほど泣くこと。","stage":7},{"id":464,"no":"464","term":"感銘","read":"かんめい","meaning":"深く感動し、心に強く刻まれること。","stage":7},{"id":465,"no":"465","term":"憶測","read":"おくそく","meaning":"十分な根拠もなく、推し量ること。","stage":7},{"id":466,"no":"466","term":"目星をつける","read":"めぼしをつける","meaning":"おおよその見当をつけること。","stage":7},{"id":467,"no":"467","term":"時好に投ずる","read":"じこうにとうずる","meaning":"その時代の人々の好みに合わせること。","stage":7}];
+
+// ===== LIMIT =====
+let currentLimit=10;
+function setLimit(n,btn){
+  currentLimit=n;
+  document.querySelectorAll('[id^="lim-btn-"]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const label=n===0?'全語':'${n}問セット'.replace('${n}',n);
+  document.getElementById('mode-all-sub').textContent=n===0?'467語すべて':n+'問セット';
+  document.getElementById('mode-weak-sub').textContent='間違えた語だけ'+(n>0?'('+n+'問)':'');
+}
+
+// ===== STAGES =====
+const STAGES=[
+  {id:1,name:"語句の意味①",sub:"頻出29語（No.001-029）",ico:"📖",col:"#4f8ef7",bg:"rgba(79,142,247,.15)"},
+  {id:2,name:"語句の意味②",sub:"頻出語句（No.030-087）",ico:"📚",col:"#7c5df9",bg:"rgba(124,93,249,.15)"},
+  {id:3,name:"語句の意味③",sub:"難語・上級（No.088-150）",ico:"💡",col:"#34d399",bg:"rgba(52,211,153,.15)"},
+  {id:4,name:"語句の意味④",sub:"発展語句（No.151-220）",ico:"🔥",col:"#f87171",bg:"rgba(248,113,113,.15)"},
+  {id:5,name:"語句の意味⑤",sub:"完成語句（No.221-300）",ico:"⭐",col:"#fbbf24",bg:"rgba(251,191,36,.15)"},
+  {id:6,name:"選択肢攻略語",sub:"迷わない語（No.301-396）",ico:"🎯",col:"#06b6d4",bg:"rgba(6,182,212,.15)"},
+  {id:7,name:"熟語の成り立ち",sub:"二字熟語構造（No.397-467）",ico:"🔤",col:"#a78bfa",bg:"rgba(167,139,250,.15)"},
+];
+
+// ===== STATE =====
+let ST={learned:{},wrong:{},flagged:{},streak:0,history:[]};
+let _saveTimer=null, _dbReady=false;
+
+function initDB(){
+  try{
+    const s=localStorage.getItem('spi_v2');
+    if(s){
+      const d=JSON.parse(s);
+      ST.learned=d.learned||{};
+      ST.wrong=d.wrong||{};
+      ST.flagged=d.flagged||{};
+      ST.streak=d.streak||0;
+    }
+  }catch(e){}
+  _dbReady=true;
+  renderHome();renderWordlist();
+}
+
+function fallbackToLocal(){
+  initDB();
+}
+
+function showSaveStatus(msg,col){
+  const el=document.getElementById('save-status');
+  if(!el)return;
+  el.textContent=msg;
+  el.style.color=col||'var(--text2)';
+  if(msg==='✓ 保存'||msg==='✓ クラウドと同期済'){
+    setTimeout(()=>{if(el.textContent===msg)el.textContent='';},2500);
+  }
+}
+
+function saveST(){
+  if(!_dbReady)return;
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(()=>{
+    try{
+      localStorage.setItem('spi_v2',JSON.stringify({learned:ST.learned,wrong:ST.wrong,flagged:ST.flagged,streak:ST.streak}));
+      showSaveStatus('✓ 保存','var(--green)');
+    }catch(e){}
+  },500);
+}
+
+function loadST(){}
+
+// ===== HELPERS =====
+function shuffle(a){let b=[...a];for(let i=b.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+
+// Generate wrong choices from same stage or nearby
+function getChoices(word){
+  let pool=VOCAB_ALL.filter(v=>v.id!==word.id);
+  let same=pool.filter(v=>v.stage===word.stage);
+  let others=pool.filter(v=>v.stage!==word.stage);
+  let cands=shuffle([...same,...others]).slice(0,15);
+  let wrongs=shuffle(cands).slice(0,3).map(v=>v.meaning);
+  let all=shuffle([word.meaning,...wrongs]);
+  return all;
+}
+
+// ===== MASTER STATE =====
+let mQueue=[],mIdx=0,mCorrect=0,mMiss=0,mAnswered=false,mTimer=null,mCurrentWord=null,mHistory=[],mLimit=0,mCardMode=false;
+
+function startMaster(mode,stageId,limit){
+  let words;
+  if(mode==="stage") words=VOCAB_ALL.filter(v=>v.stage===stageId);
+  else if(mode==="weak") words=VOCAB_ALL.filter(v=>ST.wrong[v.id]);
+  else if(mode==="flagged") words=VOCAB_ALL.filter(v=>ST.flagged[v.id]);
+  else words=[...VOCAB_ALL];
+
+  if(mode==="weak"||mode==="flagged"){
+    if(words.length===0){alert("該当する語句がありません！");return;}
+  }
+
+  // Prioritize: flagged > wrong > unseen
+  const flagged=words.filter(v=>ST.flagged[v.id]);
+  const wrong=words.filter(v=>ST.wrong[v.id]&&!ST.flagged[v.id]);
+  const other=words.filter(v=>!ST.wrong[v.id]&&!ST.flagged[v.id]);
+  let ordered=shuffle([...flagged,...wrong,...other]);
+  mLimit=limit||0;
+  if(mLimit>0) ordered=ordered.slice(0,mLimit);
+  mQueue=ordered;
+  mIdx=0;mCorrect=0;mMiss=0;mHistory=[];mAnswered=false;
+  document.getElementById('m-mode-btn').textContent=mCardMode?'📃':'💭';
+
+  const title=mode==="stage"?`ST${stageId}: ${STAGES[stageId-1].name}`:
+              mode==="weak"?"苦手集中":mode==="flagged"?"要復習":"全語マスター";
+  document.getElementById("m-title").textContent=title;
+  showScreen("master");
+  renderMaster();
+}
+
+function toggleCardMode(){
+  mCardMode=!mCardMode;
+  document.getElementById('m-mode-btn').textContent=mCardMode?'📃':'💭';
+  // Reset current card display
+  if(mCurrentWord){
+    if(mCardMode){
+      // Switch to card mode: hide choices, show flip area
+      document.getElementById('choices').innerHTML='';
+      document.getElementById('choices').style.display='none';
+      showFlipCard(mCurrentWord);
+    } else {
+      // Switch to quiz mode
+      document.getElementById('choices').style.display='';
+      hideFlipCard();
+      renderChoices(mCurrentWord);
+    }
+  }
+}
+
+function showFlipCard(w){
+  let fc=document.getElementById('flip-card-area');
+  if(!fc){
+    fc=document.createElement('div');
+    fc.id='flip-card-area';
+    fc.style.cssText='width:100%;background:var(--card);border:2px dashed var(--blue);border-radius:var(--r);padding:24px;text-align:center;cursor:pointer;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;';
+    document.getElementById('choices').parentNode.insertBefore(fc,document.getElementById('choices'));
+  }
+  fc.style.display='flex';
+  fc.innerHTML='<div style="font-size:11px;color:var(--text3)">タップして意味を確認</div><div style="font-size:12px;color:var(--blue)">👆 タップ</div>';
+  fc.onclick=()=>{
+    fc.innerHTML=`<div style="font-size:16px;font-weight:600;line-height:1.6;color:var(--text)">${w.meaning}</div>`;
+    // Show manual ok/ng buttons
+    const ch=document.getElementById('choices');
+    ch.style.display='grid';
+    ch.innerHTML=`
+      <button class="choice" style="background:rgba(248,113,113,.15);border-color:var(--red);color:var(--red)" onclick="cardAnswer(false)">✗ わからない</button>
+      <button class="choice" style="background:rgba(52,211,153,.15);border-color:var(--green);color:var(--green)" onclick="cardAnswer(true)">✓ わかった</button>`;
+  };
+}
+
+function hideFlipCard(){
+  const fc=document.getElementById('flip-card-area');
+  if(fc) fc.style.display='none';
+}
+
+function cardAnswer(correct){
+  if(mAnswered)return;
+  mAnswered=true;
+  const w=mCurrentWord;
+  if(correct){
+    mCorrect++;mHistory.push(true);
+    if(!ST.wrong[w.id]||ST.wrong[w.id]<=0){ST.learned[w.id]=true;delete ST.wrong[w.id];}
+    else ST.wrong[w.id]=(ST.wrong[w.id]||0)-1;
+    flashResult('⭕');
+  } else {
+    mMiss++;mHistory.push(false);
+    ST.wrong[w.id]=2;delete ST.learned[w.id];
+    mQueue.push(w);
+    flashResult('❌');
+  }
+  saveST();renderHome();
+  setTimeout(()=>{mIdx++;renderMaster();},600);
+}
+
+function renderChoices(w){
+  const choices=getChoices(w);
+  const box=document.getElementById('choices');
+  box.style.display='grid';
+  box.innerHTML='';
+  choices.forEach((c)=>{
+    const btn=document.createElement('button');
+    btn.className='choice';
+    btn.textContent=c;
+    btn.onclick=()=>selectAnswer(c,w.meaning,btn,choices);
+    box.appendChild(btn);
+  });
+}
+
+function renderMaster(){
+  if(mIdx>=mQueue.length){showComplete();return;}
+  mAnswered=false;
+  mCurrentWord=mQueue[mIdx];
+  const w=mCurrentWord;
+
+  document.getElementById("q-no").textContent=`No.${w.no}`;
+  document.getElementById("q-term").textContent=w.term;
+  document.getElementById("q-read").textContent=w.read||"";
+  document.getElementById("q-label").textContent=mCardMode?"意味を思い出してタップで確認":"次の語句の意味として正しいものを選べ";
+  document.getElementById("q-mprompt").textContent=mCardMode?"":"意味を選んでください";
+  document.getElementById("m-flag").textContent=ST.flagged[w.id]?"🏴":"🏳️";
+  document.getElementById("m-info").textContent=`${mIdx+1} / ${mQueue.length}`;
+  document.getElementById("m-prog-l").textContent=`${mIdx}問完了`;
+  document.getElementById("m-prog-r").textContent=`✓${mCorrect} ✗${mMiss}`;
+  document.getElementById("m-fill").style.width=(mIdx/mQueue.length*100)+"%";
+
+  // Streak dots
+  const bar=document.getElementById("streak-bar");
+  bar.innerHTML="";
+  const show=mHistory.slice(-20);
+  show.forEach(h=>{
+    const d=document.createElement("div");
+    d.className="streak-dot "+(h?"hit":"miss");
+    bar.appendChild(d);
+  });
+
+  // Reset flip card
+  hideFlipCard();
+  const box=document.getElementById("choices");
+  box.innerHTML="";
+  if(mCardMode){
+    box.style.display='none';
+    showFlipCard(w);
+  } else {
+    box.style.display='grid';
+    renderChoices(w);
+  }
+}
+
+function selectAnswer(chosen,correct,btn,allChoices){
+  if(mAnswered)return;
+  mAnswered=true;
+  clearTimeout(mTimer);
+  const w=mCurrentWord;
+  const isCorrect=chosen===correct;
+
+  document.querySelectorAll(".choice").forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===correct) b.classList.add("reveal");
+  });
+
+  if(isCorrect){
+    btn.classList.add("correct");
+    mCorrect++;
+    mHistory.push(true);
+    // wrongカウントがあれば1減らす、0以下になったら習得
+    // wrongが未設定（初回正解）なら即習得
+    const curWrong = ST.wrong[w.id];
+    if(curWrong===undefined || curWrong===null){
+      // 初回正解 → 即習得
+      ST.learned[w.id]=true;
+      delete ST.wrong[w.id];
+    } else if(curWrong <= 1){
+      // カウント0以下 → 習得
+      ST.learned[w.id]=true;
+      delete ST.wrong[w.id];
+    } else {
+      // まだカウントが残っている → 減算
+      ST.wrong[w.id]=curWrong-1;
+    }
+    flashResult("⭕");
+    saveST();
+    setTimeout(()=>{mIdx++;renderMaster();},600);
+  } else {
+    btn.classList.add("wrong");
+    mMiss++;
+    mHistory.push(false);
+    ST.wrong[w.id]=2; // 次、2回正解で卒業
+    delete ST.learned[w.id];
+    flashResult("❌");
+    // Add to end of queue for retry
+    mQueue.push(w);
+    saveST();
+    document.getElementById("choices").classList.add("shake");
+    setTimeout(()=>document.getElementById("choices").classList.remove("shake"),300);
+    setTimeout(()=>{mIdx++;renderMaster();},1000);
+  }
+  renderHome();
+}
+
+function flashResult(emoji){
+  const el=document.createElement("div");
+  el.className="result-flash";
+  el.textContent=emoji;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),500);
+}
+
+function toggleFlag(){
+  if(!mCurrentWord)return;
+  const id=mCurrentWord.id;
+  if(ST.flagged[id]){delete ST.flagged[id];document.getElementById("m-flag").textContent="🏳️";}
+  else{ST.flagged[id]=true;document.getElementById("m-flag").textContent="🏴";}
+  saveST();
+}
+
+function exitMaster(){showTab("home");}
+
+function showComplete(){
+  const pct=mQueue.length>0?Math.round(mCorrect/(mCorrect+mMiss)*100):100;
+  document.getElementById("c-cor").textContent=mCorrect;
+  document.getElementById("c-miss").textContent=mMiss;
+  document.getElementById("c-pct").textContent=pct+"%";
+  document.getElementById("c-emoji").textContent=pct>=90?"🏆":pct>=70?"🎉":"💪";
+  document.getElementById("c-title").textContent=pct>=90?"パーフェクト！":pct>=70?"よく頑張った！":"まだまだ！";
+  document.getElementById("c-rank").textContent=pct>=90?"🥇Gold":pct>=70?"🥈Silver":"🥉Bronze";
+  document.getElementById("c-sub").textContent=`正解率${pct}% ― 間違えた語は次回優先で出ます`;
+  showScreen("complete");
+}
+
+function retryMiss(){
+  const missed=VOCAB_ALL.filter(v=>ST.wrong[v.id]);
+  if(missed.length===0){alert("ミスした語句がありません！");return;}
+  startMaster("weak");
+}
+
+// ===== HOME =====
+function renderHome(){
+  const learned=Object.keys(ST.learned).length;
+  const wrong=Object.keys(ST.wrong).length;
+  const pct=Math.round(learned/467*100);
+  document.getElementById("h-learned").textContent=learned;
+  document.getElementById("h-weak").textContent=wrong;
+  document.getElementById("h-pct").textContent=pct+"%";
+
+  const list=document.getElementById("stage-list");
+  list.innerHTML="";
+  STAGES.forEach(s=>{
+    const words=VOCAB_ALL.filter(v=>v.stage===s.id);
+    const done=words.filter(v=>ST.learned[v.id]).length;
+    const pct=Math.round(done/words.length*100);
+    const div=document.createElement("div");
+    div.className="stage-row anim";
+    const countBadge = pct===100 ? '<div class="badge-done">完了✓</div>' : `<div style="font-size:11px;color:var(--text3);flex-shrink:0">${done}/${words.length}</div>`;
+    div.innerHTML=`<div class="stage-ico" style="background:${s.bg};color:${s.col}">${s.ico}</div>
+      <div class="stage-info">
+        <h3>${s.name}</h3>
+        <p>${s.sub}</p>
+        <div class="pbar"><div class="pbar-fill" style="width:${pct}%;background:${s.col}"></div></div>
+      </div>
+      ${countBadge}`;
+    div.onclick=()=>startMaster("stage",s.id,currentLimit);
+    list.appendChild(div);
+  });
+}
+
+// ===== WORDLIST =====
+let wFilter="all";
+function setWFilter(f,btn){
+  wFilter=f;
+  document.querySelectorAll(".flt").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  renderWordlist();
+}
+function renderWordlist(){
+  const q=(document.getElementById("wl-input").value||"").toLowerCase();
+  let words=[...VOCAB_ALL];
+  if(wFilter==="flagged") words=words.filter(v=>ST.flagged[v.id]);
+  else if(wFilter==="wrong") words=words.filter(v=>ST.wrong[v.id]);
+  else if(wFilter==="learned") words=words.filter(v=>ST.learned[v.id]&&!ST.wrong[v.id]);
+  else if(wFilter.startsWith("s")) words=words.filter(v=>v.stage===parseInt(wFilter[1]));
+  if(q) words=words.filter(v=>v.term.includes(q)||v.read.includes(q)||v.meaning.includes(q));
+  words.sort((a,b)=>{
+    const af=ST.flagged[a.id]?0:ST.wrong[a.id]?1:2;
+    const bf=ST.flagged[b.id]?0:ST.wrong[b.id]?1:2;
+    return af-bf||a.id-b.id;
+  });
+  const body=document.getElementById("wl-body");
+  if(words.length===0){body.innerHTML='<div style="text-align:center;color:var(--text3);padding:40px">該当なし</div>';return;}
+  body.innerHTML=words.slice(0,200).map(v=>{
+    const dc=ST.flagged[v.id]?"y":ST.wrong[v.id]?"r":ST.learned[v.id]?"g":"";
+    return `<div class="word-row ${ST.flagged[v.id]?"flagged":""}" data-id="${v.id}">
+      <div class="wdot ${dc}"></div>
+      <div class="winfo">
+        <div class="wterm">${v.term}</div>
+        ${v.read?`<div class="wread">${v.read}</div>`:""}
+        <div class="wmeaning">${v.meaning}</div>
+      </div>
+      <div class="w-stage-tag">ST${v.stage}</div>
+      <button class="wflag ${ST.flagged[v.id]?"on":""}" onclick="event.stopPropagation();wToggleFlag(${v.id})">${ST.flagged[v.id]?"🏴":"🏳️"}</button>
+    </div>`;
+  }).join("");
+  if(words.length>200) body.innerHTML+=`<div style="text-align:center;color:var(--text3);padding:12px;font-size:12px">（検索で絞り込んでください）</div>`;
+}
+function wToggleFlag(id){
+  if(ST.flagged[id])delete ST.flagged[id]; else ST.flagged[id]=true;
+  saveST();renderWordlist();renderHome();
+}
+
+// ===== PRACTICE QUESTIONS =====
+const PRAC_DATA={
+  vocab:[
+    {q:"下線部の言葉と意味が最も合致するものを選びなさい。\n\n「気にしてこだわること」",choices:["A.拘泥","B.拘束","C.熟慮","D.悔悟","E.耽溺"],ans:0,exp:"拘泥（こうでい）は「気にしてこだわること」。B拘束は自由を制限、C熟慮は十分に考えることで異なる。"},
+    {q:"下線部の言葉と意味が最も合致するものを選びなさい。\n\n「決断をためらい、ぐずぐずすること」",choices:["A.不断","B.遅延","C.逡巡","D.果敢","E.悠然"],ans:2,exp:"逡巡（しゅんじゅん）が正解。逡は「しりごみすること」、巡は「進まないこと」の意。"},
+    {q:"下線部の言葉と意味が最も合致するものを選びなさい。\n\n「文章や話に無駄が多く、しまりがないさま」",choices:["A.冗漫","B.散漫","C.蛇足","D.漫然","E.放漫"],ans:0,exp:"冗漫（じょうまん）は「文章や話に無駄が多く、しまりがないこと」。E放漫は「しまりなくいい加減」だが、文章や話に限定されない。"},
+    {q:"下線部の言葉と意味が最も合致するものを選びなさい。\n\n「大目に見て、とがめないこと」",choices:["A.ひいき","B.目こぼし","C.甘やかし","D.大雑把","E.知らん顔"],ans:1,exp:"目こぼし（めこぼし）は「過失や不正などを大目に見て、とがめないこと」が正解。"},
+    {q:"下線部の言葉と意味が最も合致するものを選びなさい。\n\n「そうなることが避けられないこと」",choices:["A.必須","B.必中","C.必至","D.逼迫","E.必死"],ans:2,exp:"必至（ひっし）が正解。必死は「死ぬ覚悟で全力を尽くすこと」で意味が異なる。必至と必死の区別はSPIの頻出ポイント。"},
+    {q:"下線部の言葉と意味が最も合致するものを選びなさい。\n\n「なりふり構わず、懸命に物事に当たる様子」",choices:["A.けなげ","B.ひたむき","C.やみくも","D.おおわらわ","E.てんてこまい"],ans:3,exp:"おおわらわが正解。「大童（おおわらわ）」と書く。けなげは困難に負けず頑張る、ひたむきは一つのことに集中する様子。"},
+    {q:"下線部の言葉と意味が最も合致するものを選びなさい。\n\n「物事の本質を見抜く、鋭い眼力」",choices:["A.刮目","B.慧眼","C.瞠目","D.省察","E.卓見"],ans:1,exp:"慧眼（けいがん）が正解。刮目は「目をこすって注意深く見ること」、瞠目は「驚いて目を見張ること」。"},
+    {q:"下線部の言葉と意味が最も合致するものを選びなさい。\n\n「直接教わらずに、ひそかにその人を師と仰ぐこと」",choices:["A.薫陶","B.私淑","C.造詣","D.研鑽","E.傾注"],ans:1,exp:"私淑（ししゅく）が正解。薫陶は「感化して良い方向へ導くこと」、造詣は「ある分野の深い知識や技量」。"},
+  ],
+  relation:[
+    {q:"最初に示された二語の関係を考えて、同じ関係の対になるよう（　）に当てはまる言葉を選びなさい。\n\n「信用金庫：金融機関」→「水彩画：（　）」",choices:["A.油絵","B.絵筆","C.絵画","D.画家","E.画材"],ans:2,exp:"信用金庫は金融機関の一種（包含関係）。水彩画は絵画の一種なのでC「絵画」が正解。"},
+    {q:"最初に示された二語の関係を考えて、同じ関係の対になるよう（　）に当てはまる言葉を選びなさい。\n\n「解散：集合」→「派遣：（　）」",choices:["A.帰国","B.出向","C.召還","D.召集","E.復帰"],ans:2,exp:"解散と集合は対義語。派遣の対義語は「召還（しょうかん）」＝派遣した人を呼び戻すこと。召集（人を呼び集める）とは別。"},
+    {q:"最初に示された二語の関係を考えて、同じ関係の対になるよう（　）に当てはまる言葉を選びなさい。\n\n「病院：医療」→「新聞：（　）」",choices:["A.記事","B.執筆","C.宣伝","D.報道","E.事件"],ans:3,exp:"病院の役目は医療（役目の関係）。新聞の役目は「報道」なのでD。記事は新聞の内容であり役目ではない。"},
+    {q:"最初に示された二語の関係を考えて、同じ関係の対になるよう（　）に当てはまる言葉を選びなさい。\n\n「大雨：洪水」→「漏電：（　）」",choices:["A.電気","B.火事","C.停電","D.感電","E.発電"],ans:1,exp:"大雨が原因で洪水が起きる（原因→結果の関係）。漏電が原因で火事（火災）が起きるのでB「火事」が正解。"},
+    {q:"最初に示された二語の関係を考えて、同じ関係の対になるよう（　）に当てはまる言葉を選びなさい。\n\n「めでる：ほめる」→「倒る：（　）」",choices:["A.見くびる","B.おだてる","C.困る","D.失敗","E.嫌がる"],ans:0,exp:"めでると褒めるは同義語（同義語の関係）。倒る（侮る）の同義語は「見くびる」。"},
+    {q:"最初に示された二語の関係を考えて、同じ関係の対になるよう（　）に当てはまる言葉を選びなさい。\n\n「弓：矢」→「うす：（　）」",choices:["A.打撃","B.祭り","C.鼓笛","D.皮","E.きね"],ans:4,exp:"弓と矢はワンセット（一組の関係）。うすとセットで使うのは「きね」（餅つきに使う）なのでE。"},
+  ],
+  multi:[
+    {q:"下線部の語が最も近い意味で使われているものを1つ選びなさい。\n\n「見てきたところを述べる」",choices:["A.今着いたところです","B.信じるところを貫く","C.よいところを伸ばす","D.ところを得る","E.今のところ大丈夫です"],ans:1,exp:"「述べる（内容や考えなど）ところ」の「ところ」は「事・内容・場面」の意味。B「信じるところを貫く」も同じ意味。"},
+    {q:"下線部の語が最も近い意味で使われているものを1つ選びなさい。\n\n「仕事にはばをもたせる」",choices:["A.はばのある声","B.道のはばを測る","C.世間にはばをきかせる","D.人間にはばができる","E.値上げはばが大きい"],ans:2,exp:"「はばをもたせる」の「はば」は「余地・ゆとり」の意味。C「世間にはばをきかせる」も「勢力・影響力」→「活動の余地」の意。"},
+    {q:"下線部の語が最も近い意味で使われているものを1つ選びなさい。\n\n「勇気がわく」",choices:["A.湯がわく","B.麹がわく","C.議論がわく","D.非難がわく","E.場内がわく"],ans:3,exp:"「勇気がわく」は感情・思いが生じること。「非難がわく」も同じ意味（D）。C「議論がわく」は活性化のわく。"},
+    {q:"下線部の語が最も近い意味で使われているものを1つ選びなさい。\n\n「先を争う」",choices:["A.二軒先の建物","B.一寸先も見えない","C.玄関先に置いた","D.行き着く先が見えない","E.先に立って働く"],ans:4,exp:"「先を争う」の「先」は「前、優位な位置」の意。E「先に立って働く」の「先」も同じ「前に立つ」意味。"},
+  ],
+  fill:[
+    {q:"文中の空欄に入る最も適切なものを1つ選びなさい。\n\n「会議が□□□□と進まない」",choices:["A.延延と","B.永遠と","C.ふとして","D.遅遅として","E.ようとして"],ans:3,exp:"「遅遅として（ちちとして）」は「物事の進み方が遅い様子」。空欄補充では前後の文脈とセットで覚える慣用表現が重要。"},
+    {q:"文中の空欄に入る最も適切なものを1つ選びなさい。\n\n「彼はこの研究の□□□である」",choices:["A.草分け","B.しんがり","C.筆頭","D.皮切り","E.口開け"],ans:0,exp:"「草分け（くさわけ）」は「ある分野を最初に切り開いた人・先駆者」。しんがりは「最後尾」、筆頭は「名簿の先頭」。"},
+    {q:"文中の空欄に入る最も適切なものを1つ選びなさい。\n\n「複雑な□□を呈する」",choices:["A.活況","B.様相","C.様態","D.形相","E.苦言"],ans:1,exp:"「様相を呈する（ようそうをていする）」は頻出の慣用表現。「ある様子や状態を示すこと」。活況を呈する、苦言を呈するもセットで覚える。"},
+    {q:"文中の空欄に入る最も適切なものを1つ選びなさい。\n\n「欠点や悪習を□□する」",choices:["A.修正","B.修整","C.矯正","D.改正","E.校正"],ans:2,exp:"矯正（きょうせい）は「欠点や悪い習慣などを正すこと」。改正は「法律・規則の不備を直す」、校正は「文字の誤りを確認し正す」。"},
+    {q:"文中の空欄に入る最も適切なものを1つ選びなさい。\n\n「時に□□する事業を企てる」",choices:["A.時好","B.時節","C.時機","D.時間","E.時代"],ans:0,exp:"「時好に投ずる（じこうにとうずる）」は「その時代の人々の好みに合わせること」。時機は「ちょうどよい機会」。"},
+  ],
+  sort:[
+    {q:"【文の並べ替え】アからオを意味が通るように並べ替えたとき、イの次にくる文を選びなさい。\n\nア これはある時点を基準にして、過去・現在・未来へとまっすぐ流れていく\nイ 一つは、一直線に同じ方向へと流れていく「とき」だ\nウ 繰り返し回って、元に戻ることで永遠を目指す「とき」である\nエ 回る時間もある\nオ 「とき」には2種類がある",choices:["A.ア","B.ウ","C.エ","D.オ","E.イが最後"],ans:0,exp:"オ「とき」には2種類→イ（一直線の時）→ア（その説明）→エ（回る時間もある）→ウ（循環の時）の順が自然。イの次はアが正解。"},
+    {q:"【文節の並べ替え】AからEの語句を[1]から[5]に入れて文の意味が通るようにしたとき、[4]に当てはまるものを選びなさい。\n\n画家は[1][2][3][4][5]把握することが大切である。\n\nA.残したいと願うものだが\nB.その作品を何年、何十年も先まで\nC.未来に引き継いでいきたいものを\nD.昔から変わらずに伝えられてきたものや\nE.そのためには現在必要なものだけでなく",choices:["A.A","B.B","C.C","D.D","E.E"],ans:3,exp:"BAEDC の順が正解。画家は[B:作品を何年も先まで][A:残したいと願うが][E:現在必要なものだけでなく][D:昔から変わらず伝えられてきたものや][C:未来に引き継ぎたいものを]把握することが大切。[4]=D。"},
+  ],
+  compound:[
+    {q:"二字熟語「架橋」の成り立ちとして最も当てはまるものを選びなさい。",choices:["A.似た意味を持つ漢字を重ねる","B.前の漢字が後の漢字を修飾する","C.動詞の後に目的語をおく","D.反対の意味を持つ漢字を重ねる","E.主語と述語の関係にある"],ans:2,exp:"架橋（かきょう）は「橋を架ける」→架（動詞）＋橋（目的語）。C「動詞の後に目的語をおく」が正解。"},
+    {q:"二字熟語「理非」の成り立ちとして最も当てはまるものを選びなさい。",choices:["A.似た意味を持つ漢字を重ねる","B.前の漢字が後の漢字を修飾する","C.動詞の後に目的語をおく","D.反対の意味を持つ漢字を重ねる","E.主語と述語の関係にある"],ans:3,exp:"理非（りひ）は「道理に合うこと（理）と合わないこと（非）」→反対の意味を持つ漢字を重ねる（D）が正解。"},
+    {q:"二字熟語「霧散」の成り立ちとして最も当てはまるものを選びなさい。",choices:["A.似た意味を持つ漢字を重ねる","B.前の漢字が後の漢字を修飾する","C.動詞の後に目的語をおく","D.反対の意味を持つ漢字を重ねる","E.主語と述語の関係にある"],ans:4,exp:"霧散（むさん）は「霧（主語）が散る（述語）」→主語と述語の関係（E）が正解。"},
+    {q:"二字熟語「壮観」の成り立ちとして最も当てはまるものを選びなさい。",choices:["A.似た意味を持つ漢字を重ねる","B.前の漢字が後の漢字を修飾する","C.動詞の後に目的語をおく","D.反対の意味を持つ漢字を重ねる","E.主語と述語の関係にある"],ans:1,exp:"壮観（そうかん）は「壮大な（前）→眺め（後）」→前の漢字が後を修飾（B）が正解。壮が観を修飾している。"},
+    {q:"二字熟語「功罪」の成り立ちとして最も当てはまるものを選びなさい。",choices:["A.似た意味を持つ漢字を重ねる","B.前の漢字が後の漢字を修飾する","C.動詞の後に目的語をおく","D.反対の意味を持つ漢字を重ねる","E.主語と述語の関係にある"],ans:3,exp:"功罪（こうざい）は「よい働き（功）と悪い影響（罪）」→反対の意味を持つ漢字を重ねる（D）が正解。"},
+    {q:"二字熟語「添削」の成り立ちとして最も当てはまるものを選びなさい。",choices:["A.似た意味を持つ漢字を重ねる","B.前の漢字が後の漢字を修飾する","C.動詞の後に目的語をおく","D.反対の意味を持つ漢字を重ねる","E.主語と述語の関係にある"],ans:0,exp:"添削（てんさく）は「加える（添）と削る（削）」→反対に見えるが、どちらも「文章を直す」という類似した意味を持つ動詞を重ねている（A）。"},
+  ]
+};
+
+let pType="vocab",pIdx=0,pAnswered=false;
+
+function setPType(t,btn){
+  pType=t;pIdx=0;pAnswered=false;
+  document.querySelectorAll(".ptab").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  renderPrac();
+  document.getElementById("prac-fab").style.display="none";
+}
+
+function renderPrac(){
+  const qs=PRAC_DATA[pType]||[];
+  if(qs.length===0){document.getElementById("prac-body").innerHTML='<div style="text-align:center;color:var(--text3);padding:40px">問題を準備中…</div>';return;}
+  const q=qs[pIdx%qs.length];
+  pAnswered=false;
+  document.getElementById("prac-fab").style.display="none";
+  const lines=q.q.split("\n").filter(l=>l);
+  const html=lines.map(l=>l.replace(/「(.+?)」/g,(m,p)=>`「<span class="pq-ul">${p}</span>」`)).join("<br>");
+  document.getElementById("prac-body").innerHTML=`<div class="pq-card anim">
+    <div class="pq-num">問${pIdx+1}　${getPLabel()}</div>
+    <div class="pq-text">${html}</div>
+    <div class="pq-choices">
+      ${q.choices.map((c,i)=>`<button class="pq-choice" onclick="pickPrac(${i})" data-i="${i}">
+        <span class="pq-lbl">${["A","B","C","D","E"][i]}</span>${c.replace(/^[A-E]\./,"")}
+      </button>`).join("")}
+    </div>
+    <div class="pq-exp" id="pq-exp">${q.exp}</div>
+  </div>`;
+}
+
+function getPLabel(){
+  const m={vocab:"語句の意味",relation:"二語の関係",multi:"複数の意味",fill:"空欄補充",sort:"文の並べ替え",compound:"熟語の成り立ち"};
+  return m[pType]||"";
+}
+
+function pickPrac(idx){
+  if(pAnswered)return;
+  pAnswered=true;
+  const q=(PRAC_DATA[pType]||[])[pIdx%(PRAC_DATA[pType]||[{choices:[]}]).length];
+  document.querySelectorAll(".pq-choice").forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.ans)b.classList.add("correct");
+    else if(i===idx&&i!==q.ans)b.classList.add("wrong");
+  });
+  document.getElementById("pq-exp").classList.add("show");
+  document.getElementById("prac-fab").style.display="block";
+}
+
+function nextPrac(){
+  pIdx++;renderPrac();
+  document.getElementById("prac-body").scrollTo(0,0);
+}
+
+// ===== STATS =====
+function renderStats(){
+  const learned=Object.keys(ST.learned).length;
+  const wrong=Object.keys(ST.wrong).length;
+  const flagged=Object.keys(ST.flagged).length;
+  const pct=Math.round(learned/467*100);
+  const body=document.getElementById("stats-body");
+  body.innerHTML=`
+    <div style="background:var(--surf);border:1px solid var(--bord);border-radius:var(--rs);padding:16px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px;">全体の進捗</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+        <div><div style="font-size:22px;font-weight:800;color:var(--green)">${learned}</div><div style="font-size:10px;color:var(--text2)">習得済み</div></div>
+        <div><div style="font-size:22px;font-weight:800;color:var(--red)">${wrong}</div><div style="font-size:10px;color:var(--text2)">要復習</div></div>
+        <div><div style="font-size:22px;font-weight:800;color:var(--gold)">${flagged}</div><div style="font-size:10px;color:var(--text2)">フラグ</div></div>
+      </div>
+      <div style="margin-top:12px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px;"><span>達成率</span><span>${pct}%</span></div>
+        <div style="height:8px;background:var(--bord);border-radius:4px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:4px;"></div></div>
+      </div>
+    </div>
+    ${STAGES.map(s=>{
+      const words=VOCAB_ALL.filter(v=>v.stage===s.id);
+      const done=words.filter(v=>ST.learned[v.id]).length;
+      const p=Math.round(done/words.length*100);
+      return `<div style="background:var(--surf);border:1px solid var(--bord);border-radius:var(--rs);padding:12px 14px;display:flex;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;border-radius:9px;background:${s.bg};color:${s.col};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${s.ico}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700">${s.name}</div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin:4px 0 2px"><span>${done}/${words.length}語</span><span>${p}%</span></div>
+          <div style="height:3px;background:var(--bord);border-radius:2px;overflow:hidden"><div style="height:100%;width:${p}%;background:${s.col};border-radius:2px"></div></div>
+        </div>
+      </div>`;
+    }).join("")}
+    <button onclick="if(confirm(\'リセットしますか？\'))resetAll()" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:var(--rs);padding:12px;font-size:13px;color:var(--red);font-family:inherit;cursor:pointer;width:100%;">学習データをリセット</button>
+  `;
+}
+
+function resetConfirm(){if(confirm('リセットしますか？'))resetAll();}
+function resetConfirm(){if(confirm('リセットしますか？'))resetAll();}
+function resetAll(){
+  ST={learned:{},wrong:{},flagged:{},streak:0,history:[]};
+  saveST();renderHome();renderWordlist();renderStats();
+}
+
+// ===== NAVIGATION =====
+function showTab(id){
+  if(id==="home"){renderHome();}
+  else if(id==="wordlist"){renderWordlist();}
+  else if(id==="practice"){renderPrac();}
+  else if(id==="stats"){renderStats();}
+  showScreen(id);
+  document.querySelectorAll(".tn").forEach(t=>t.classList.remove("active"));
+  const tn=document.getElementById("tn-"+id);
+  if(tn)tn.classList.add("active");
+}
+
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// ===== INIT =====
+renderPrac();
+initDB();
+</script>
+</body>
+</html>
+</body></html>
